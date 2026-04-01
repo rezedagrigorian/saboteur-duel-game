@@ -1,18 +1,18 @@
-export type TCardPort = {
-    group: number
-    isTroll: boolean
-    isGold: boolean
+export interface ICardPort {
+  group: number
+  isTroll: boolean
+  isGold: boolean
 }
 
-export type TCardRotation = boolean
+export type ICardRotation = boolean
 
 /** Ровно четыре порта: по одному на каждую сторону карты. */
-export type TCardPorts = [TCardPort?, TCardPort?, TCardPort?, TCardPort?]
+export type ICardPorts = [ICardPort?, ICardPort?, ICardPort?, ICardPort?]
 
-export type TCard = {
+export interface ICard {
   id: string
-  ports: TCardPorts
-  rotation: TCardRotation
+  ports: ICardPorts
+  rotation: ICardRotation
   isGolden: boolean
   user: string
 }

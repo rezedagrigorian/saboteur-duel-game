@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
-import { ref } from 'vue'
+import { computed } from 'vue'
 
-import type { TCard, TCardPort } from '@/types'
+import type { ICard } from '@/types'
 import { useCardStore } from '../../stores/cardStore'
 
 const props = defineProps<{
@@ -10,27 +10,29 @@ const props = defineProps<{
 }>()
 
 const { getCardById } = useCardStore()
-const card: TCard | undefined = getCardById(props.cardId)
+const card = computed<ICard | undefined>(() => getCardById(props.cardId))
 
-const portsColorMap = ref([
+const PORT_COLOR_MAP = [
   'red',
   'green',
   'blue',
-])
+]
 
-const portPositions = ref([
+const PORT_POSITIONS = [
   'left-[-8px] top-1/2 -translate-y-1/2',      // 0 - слева по центру
   'top-[-8px] left-1/2 -translate-x-1/2',      // 1 - сверху по центру
   'right-[-8px] top-1/2 -translate-y-1/2',     // 2 - справа по центру
   'bottom-[-8px] left-1/2 -translate-x-1/2',   // 3 - снизу по центру
-])
+]
 
 </script>
 
 <template>
   <div
     v-if="card"
-    class="relative grid size-[72px] place-items-center rounded-lg border border-red-600 text-xs text-neutral-800"
+    role="button"
+    tabindex="0"
+    class="relative grid size-[72px] cursor-pointer place-items-center rounded-lg border text-xs text-neutral-800 transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ring-offset-2"
     :style="{
       backgroundColor: card.isGolden ? 'gold' : 'white',
     }"
@@ -39,14 +41,14 @@ const portPositions = ref([
       v-for="(port, index) in card.ports"
       :key="card.id + '-' + index"
       class="absolute w-4 h-4"
-      :class="portPositions[index]"
+      :class="PORT_POSITIONS[index]"
     >
       <div
         v-if="port"
         :key="port.group"
         class="w-4 h-4"
         :style="{
-          backgroundColor: portsColorMap[port.group],
+          backgroundColor: PORT_COLOR_MAP[port.group],
           border: port.isTroll ? '1px dashed black' : 'none',
         }"
       >

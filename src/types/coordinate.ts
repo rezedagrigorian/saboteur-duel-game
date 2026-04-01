@@ -1,4 +1,4 @@
-export type TCoordinate = {
+export interface ICoordinate {
   x: number
   y: number
 }

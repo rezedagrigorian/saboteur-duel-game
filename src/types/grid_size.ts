@@ -1,4 +1,4 @@
-export type TGridSize = {
+export interface IGridSize {
   width: number
   height: number
 }

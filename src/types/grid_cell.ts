@@ -1,7 +1,7 @@
-import type { TCoordinate } from './coordinate'
+import type { ICoordinate } from './coordinate'
 
-export type TGridCell = {
-  coordinate: TCoordinate
+export interface IGridCell {
+  coordinate: ICoordinate
   id: string
   card?: string
 }

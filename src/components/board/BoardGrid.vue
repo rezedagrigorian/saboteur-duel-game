@@ -3,18 +3,18 @@
 import BoardCell from './BoardCell.vue'
 import { useGridStore } from '../../stores/gridStore'
 
-const gridConfigurationStore = useGridStore()
+const gridStore = useGridStore()
 </script>
 
 <template>
   <div
-    class="grid gap-1.5 bg-red-100 p-2"
+    class="grid gap-1.5 bg-red-100 p-2 min-w-[30rem]"
     :style="{
-      gridTemplateColumns: `repeat(${gridConfigurationStore.grid.size.width}, 100px)`,
+      gridTemplateColumns: `repeat(${gridStore.grid.size.width}, 100px)`,
     }"
   >
     <BoardCell
-      v-for="cell in gridConfigurationStore.grid.cells"
+      v-for="cell in gridStore.grid.cells"
       :key="cell.id"
       v-bind="cell"
     />

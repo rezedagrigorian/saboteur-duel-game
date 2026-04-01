@@ -1,17 +1,24 @@
 <script setup lang="ts">
-import type { TGridCell } from '@/types'
+import { v4 as uuidv4 } from 'uuid'
 
-import { useGridStore } from '../../stores/gridStore'
-import { useCardStore } from '../../stores/cardStore'
+import type { IGridCell } from '@/types'
+
+import { useCardStore } from '@/stores/cardStore'
+import { useGridStore } from '@/stores/gridStore'
+
 import Card from '../cards/Card.vue'
 
-const props = defineProps<TGridCell>()
+const props = defineProps<IGridCell>()
 
 const { assignCardToCell } = useGridStore()
 const cardStore = useCardStore()
 
 function handleClick() {
-  const cardId = cardStore.createRandomCard(props.id)
+  if (props.card) {
+    return
+  }
+  const cardId = uuidv4()
+  cardStore.createRandomCard(cardId)
   assignCardToCell(props.id, cardId)
 }
 </script>
@@ -19,15 +26,12 @@ function handleClick() {
 <template>
   <button
     type="button"
-    class="aspect-[5/7] w-full min-w-0 border border-neutral-900 p-2"
+    class="aspect-[5/7] w-full min-w-0 border border-neutral-900 p-2 transition-colors"
     @click="handleClick"
   >
-    <div style="font-size: 10px">
-      <h6>{{ id }}</h6>
-      <Card
-        v-if="card"
-        :card-id="card"
-      />
-    </div>
+    <Card
+      v-if="card"
+      :card-id="card"
+    />
   </button>
 </template>

@@ -1,32 +1,11 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
 import BoardGrid from '../components/board/BoardGrid.vue'
-
-interface PlacedByCell {
-  [cellKey: string]: string
-}
-
-interface CellCoords {
-  x: number
-  y: number
-}
-
-const placed = reactive<PlacedByCell>({
-  '0,2': 'S',
-  '1,2': 'P',
-})
-
-function onPlaceAttempt({ x, y }: CellCoords) {
-  // Temporary debug until move validation is implemented.
-  console.warn('place-at', x, y)
-}
+import CardList from '../components/cards/CardList.vue'
 </script>
 
 <template>
-  <div class="my-6">
-    <BoardGrid
-      :placed="placed"
-      @place-at="onPlaceAttempt"
-    />
+  <div class="mx-auto flex w-full max-w-[76rem] flex-wrap items-start gap-4 p-4 md:gap-6">
+    <BoardGrid />
+    <CardList />
   </div>
 </template>

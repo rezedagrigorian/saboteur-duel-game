@@ -1,7 +1,7 @@
-import type { TGridSize } from './grid_size'
-import type { TGridCell } from './grid_cell'
+import type { IGridSize } from './grid_size'
+import type { IGridCell } from './grid_cell'
 
-export type TGrid = {
-  size: TGridSize
-  cells: TGridCell[]
+export interface IGrid {
+  size: IGridSize
+  cells: IGridCell[]
 }

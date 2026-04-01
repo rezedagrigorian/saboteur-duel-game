@@ -2,14 +2,14 @@ import { v4 as uuidv4 } from 'uuid'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-import type { TGrid, TGridCell } from '@/types'
+import type { IGrid, IGridCell } from '@/types'
 
 const DEFAULT_GRID_WIDTH = 5
 const DEFAULT_GRID_HEIGHT = 5
 
 
-function createGridCells(width: number, height: number): TGridCell[] {
-  const cells: TGridCell[] = []
+function createGridCells(width: number, height: number): IGridCell[] {
+  const cells: IGridCell[] = []
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -23,7 +23,7 @@ function createGridCells(width: number, height: number): TGridCell[] {
   return cells
 }
 
-function createGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT): TGrid {
+function createGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT): IGrid {
   return {
     size: {
       width,
@@ -34,7 +34,7 @@ function createGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT): T
 }
 
 export const useGridStore = defineStore('grid', () => {
-  const grid = ref<TGrid>(createGrid())
+  const grid = ref<IGrid>(createGrid())
 
   function initializeGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT) {
     grid.value = createGrid(width, height)
