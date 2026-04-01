@@ -1,0 +1,122 @@
+[
+  {
+    "id": "9bd8b149-9988-46ca-823d-e78c8a4135c5",
+    "ports": [
+      { "group": 1, "isTroll": false, "isGold": false },
+      { "group": 1, "isTroll": false, "isGold": true },
+      { "group": 2, "isTroll": true, "isGold": false },
+      null
+    ],
+    "rotation": false,
+    "isGolden": false,
+    "user": "player1"
+  },
+  {
+    "id": "f56a786c-1c01-4c85-be6d-dd7347a7f73b",
+    "ports": [
+      { "group": 3, "isTroll": false, "isGold": true },
+      null,
+      { "group": 3, "isTroll": false, "isGold": true },
+      null
+    ],
+    "rotation": true,
+    "isGolden": true,
+    "user": "player2"
+  },
+  {
+    "id": "4cdaca13-7ca4-48bc-9d37-aab3b7eb00e7",
+    "ports": [
+      null,
+      { "group": 1, "isTroll": true, "isGold": false },
+      { "group": 1, "isTroll": true, "isGold": false },
+      { "group": 2, "isTroll": false, "isGold": false }
+    ],
+    "rotation": false,
+    "isGolden": false,
+    "user": "player1"
+  },
+  {
+    "id": "6aee5eb5-7a9a-4d36-9d87-221de678f1f1",
+    "ports": [
+      { "group": 2, "isTroll": false, "isGold": false },
+      { "group": 2, "isTroll": false, "isGold": false },
+      { "group": 2, "isTroll": false, "isGold": false },
+      { "group": 2, "isTroll": false, "isGold": false }
+    ],
+    "rotation": true,
+    "isGolden": false,
+    "user": "player2"
+  },
+  {
+    "id": "33686672-4250-4a54-990c-a4de4e82853d",
+    "ports": [
+      { "group": 1, "isTroll": true, "isGold": true },
+      null,
+      null,
+      { "group": 1, "isTroll": true, "isGold": true }
+    ],
+    "rotation": false,
+    "isGolden": true,
+    "user": "player1"
+  },
+  {
+    "id": "ddb1ca7e-c60a-455a-b628-b942885481b0",
+    "ports": [
+      null,
+      { "group": 3, "isTroll": false, "isGold": false },
+      { "group": 3, "isTroll": false, "isGold": true },
+      { "group": 1, "isTroll": false, "isGold": false }
+    ],
+    "rotation": true,
+    "isGolden": false,
+    "user": "player2"
+  },
+  {
+    "id": "c11a4776-8f3b-409b-a3ea-fa60c9a27d13",
+    "ports": [
+      { "group": 2, "isTroll": true, "isGold": false },
+      { "group": 2, "isTroll": true, "isGold": false },
+      null,
+      null
+    ],
+    "rotation": false,
+    "isGolden": false,
+    "user": "player1"
+  },
+  {
+    "id": "900f6265-f9d6-4e67-9193-b58449cb7354",
+    "ports": [
+      { "group": 1, "isTroll": false, "isGold": true },
+      { "group": 1, "isTroll": false, "isGold": true },
+      { "group": 1, "isTroll": false, "isGold": true },
+      null
+    ],
+    "rotation": true,
+    "isGolden": true,
+    "user": "player2"
+  },
+  {
+    "id": "d95376ce-37a1-4229-8dd4-a60a4cb93323",
+    "ports": [
+      null,
+      null,
+      { "group": 3, "isTroll": true, "isGold": false },
+      { "group": 3, "isTroll": true, "isGold": false }
+    ],
+    "rotation": false,
+    "isGolden": false,
+    "user": "player1"
+  },
+  {
+    "id": "b7b71187-f18f-475b-843f-7de5b4e10eab",
+    "ports": [
+      { "group": 2, "isTroll": false, "isGold": true },
+      { "group": 3, "isTroll": true, "isGold": false },
+      { "group": 2, "isTroll": false, "isGold": true },
+      { "group": 3, "isTroll": true, "isGold": false }
+    ],
+    "rotation": true,
+    "isGolden": true,
+    "user": "player2"
+  }
+]
