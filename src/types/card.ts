@@ -14,5 +14,5 @@ export interface ICard {
   ports: ICardPorts
   rotation: ICardRotation
   isGolden: boolean
-  user: string
+  user: string | null
 }

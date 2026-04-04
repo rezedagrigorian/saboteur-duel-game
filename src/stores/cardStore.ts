@@ -1,20 +1,9 @@
-import { v4 as uuidv4 } from 'uuid'
+
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-import type { ICard, ICardPort } from '@/types'
+import type { ICard } from '@/types'
 import cardsJson from './cards.json'
-
-function generateRandomPort(): ICardPort | undefined {
-  const isEmpty = Math.random() < 0.2
-  if (isEmpty) return undefined
-
-  return {
-    group: Math.floor(Math.random() * 3),
-    isTroll: Math.random() < 0.5,
-    isGold: Math.random() < 0.5,
-  }
-}
 
 export const useCardStore = defineStore('cards', () => {
   const cards = ref<Map<string, ICard>>(
@@ -23,22 +12,6 @@ export const useCardStore = defineStore('cards', () => {
   const cardIds = computed(() => Array.from(cards.value.keys()))
   const selectedCardId = ref<string | null>(null)
 
-  function createRandomCard(id: string): string {
-    const card: ICard = {
-      id,
-      ports: [
-        generateRandomPort(),
-        generateRandomPort(),
-        generateRandomPort(),
-        generateRandomPort(),
-      ],
-      rotation: false,
-      user: uuidv4(),
-      isGolden: Math.random() < 0.5,
-    }
-    cards.value.set(id, card)
-    return id
-  }
 
   function getCardById(id: string): ICard | undefined {
     return cards.value.get(id)
@@ -48,12 +21,24 @@ export const useCardStore = defineStore('cards', () => {
     selectedCardId.value = id
   }
 
+  function markCardAsPlaced(id: string, userId: string) {
+    const card = cards.value.get(id)
+    if (card) {
+      card.user = userId
+    }
+  }
+
+  function clearSelection() {
+    selectedCardId.value = null
+  }
+
   return {
     cards,
     cardIds,
     selectedCardId,
-    createRandomCard,
     getCardById,
     selectCard,
+    markCardAsPlaced,
+    clearSelection,
   }
 })

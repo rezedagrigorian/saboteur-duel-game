@@ -9,7 +9,7 @@
     ],
     "rotation": false,
     "isGolden": false,
-    "user": "player1"
+    "user": null
   },
   {
     "id": "f56a786c-1c01-4c85-be6d-dd7347a7f73b",
@@ -21,7 +21,7 @@
     ],
     "rotation": true,
     "isGolden": true,
-    "user": "player2"
+    "user": null
   },
   {
     "id": "4cdaca13-7ca4-48bc-9d37-aab3b7eb00e7",
@@ -33,7 +33,7 @@
     ],
     "rotation": false,
     "isGolden": false,
-    "user": "player1"
+    "user": null
   },
   {
     "id": "6aee5eb5-7a9a-4d36-9d87-221de678f1f1",
@@ -45,7 +45,7 @@
     ],
     "rotation": true,
     "isGolden": false,
-    "user": "player2"
+    "user": null
   },
   {
     "id": "33686672-4250-4a54-990c-a4de4e82853d",
@@ -57,7 +57,7 @@
     ],
     "rotation": false,
     "isGolden": true,
-    "user": "player1"
+    "user": null
   },
   {
     "id": "ddb1ca7e-c60a-455a-b628-b942885481b0",
@@ -69,7 +69,7 @@
     ],
     "rotation": true,
     "isGolden": false,
-    "user": "player2"
+    "user": null
   },
   {
     "id": "c11a4776-8f3b-409b-a3ea-fa60c9a27d13",
@@ -81,7 +81,7 @@
     ],
     "rotation": false,
     "isGolden": false,
-    "user": "player1"
+    "user": null
   },
   {
     "id": "900f6265-f9d6-4e67-9193-b58449cb7354",
@@ -93,7 +93,7 @@
     ],
     "rotation": true,
     "isGolden": true,
-    "user": "player2"
+    "user": null
   },
   {
     "id": "d95376ce-37a1-4229-8dd4-a60a4cb93323",
@@ -105,7 +105,7 @@
     ],
     "rotation": false,
     "isGolden": false,
-    "user": "player1"
+    "user": null
   },
   {
     "id": "b7b71187-f18f-475b-843f-7de5b4e10eab",
@@ -117,6 +117,6 @@
     ],
     "rotation": true,
     "isGolden": true,
-    "user": "player2"
+    "user": null
   }
 ]
