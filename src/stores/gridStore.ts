@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 import type { IGrid, IGridCell } from '@/types'
+import { useCardStore } from './cardStore'
 
 const DEFAULT_GRID_WIDTH = 5
 const DEFAULT_GRID_HEIGHT = 5
@@ -35,15 +36,18 @@ function createGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT): I
 
 export const useGridStore = defineStore('grid', () => {
   const grid = ref<IGrid>(createGrid())
+  const cardStore = useCardStore()
 
   function initializeGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT) {
     grid.value = createGrid(width, height)
   }
 
-  function assignCardToCell(cellId: string, card: string) {
+  function assignCardToCell(cellId: string, cardId: string, userId: string) {
     const cell = grid.value.cells.find(c => c.id === cellId)
     if (cell && !cell.card) {
-      cell.card = card
+      cell.card = cardId
+      cardStore.markCardAsPlaced(cardId, userId)
+      cardStore.clearSelection()
     }
   }
 

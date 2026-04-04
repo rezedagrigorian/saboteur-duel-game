@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { v4 as uuidv4 } from 'uuid'
-
 import type { IGridCell } from '@/types'
 
 import { useCardStore } from '@/stores/cardStore'
@@ -14,12 +12,8 @@ const { assignCardToCell } = useGridStore()
 const cardStore = useCardStore()
 
 function handleClick() {
-  if (props.card) {
-    return
-  }
-  const cardId = uuidv4()
-  cardStore.createRandomCard(cardId)
-  assignCardToCell(props.id, cardId)
+  if (props.card || !cardStore.selectedCardId) { return }
+  assignCardToCell(props.id, cardStore.selectedCardId, 'player1')
 }
 </script>
 
