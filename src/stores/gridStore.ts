@@ -42,8 +42,15 @@ export const useGridStore = defineStore('grid', () => {
     grid.value = createGrid(width, height)
   }
 
+  function findCellId(cellId: string) {
+    return grid.value.cells.find(c => c.id === cellId)
+  }
+
   function assignCardToCell(cellId: string, cardId: string, userId: string) {
-    const cell = grid.value.cells.find(c => c.id === cellId)
+    if (!userId.trim()) {
+      return
+    }
+    const cell = findCellId(cellId)
     if (cell && !cell.card) {
       cell.card = cardId
       cardStore.markCardAsPlaced(cardId, userId)

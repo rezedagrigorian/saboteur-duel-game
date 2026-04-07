@@ -22,6 +22,9 @@ export const useCardStore = defineStore('cards', () => {
   }
 
   function markCardAsPlaced(id: string, userId: string) {
+    if (!userId.trim()) {
+      return
+    }
     const card = cards.value.get(id)
     if (card) {
       card.user = userId
