@@ -118,5 +118,17 @@
     "rotation": true,
     "isGolden": true,
     "user": null
+  },
+  {
+    "id": "63782181-d535-470e-90b2-44913a553332",
+    "ports": [
+      { "group": 1, "isTroll": false, "isGold": false },
+      { "group": 1, "isTroll": false, "isGold": false },
+      { "group": 1, "isTroll": false, "isGold": false },
+      { "group": 1, "isTroll": false, "isGold": false }
+    ],
+    "rotation": false,
+    "isGolden": false,
+    "user": null
   }
 ]

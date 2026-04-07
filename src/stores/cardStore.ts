@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 import type { ICard } from '@/types'
+import { START_CARD_ID } from '@/game-core/constants'
 import cardsJson from './cards.json'
 
 export const useCardStore = defineStore('cards', () => {
@@ -10,6 +11,7 @@ export const useCardStore = defineStore('cards', () => {
     new Map((cardsJson as ICard[]).map(card => [card.id, card] as [string, ICard]))
   )
   const cardIds = computed(() => Array.from(cards.value.keys()))
+  const playableCardIds = computed(() => cardIds.value.filter(id => id !== START_CARD_ID))
   const selectedCardId = ref<string | null>(null)
 
 
@@ -38,6 +40,7 @@ export const useCardStore = defineStore('cards', () => {
   return {
     cards,
     cardIds,
+    playableCardIds,
     selectedCardId,
     getCardById,
     selectCard,

@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia'
 import { useCardStore } from '@/stores/cardStore'
 import Card from './Card.vue'
 const cardStore = useCardStore()
-const { cardIds, selectedCardId, cards } = storeToRefs(cardStore)
+const { playableCardIds, selectedCardId, cards } = storeToRefs(cardStore)
 </script>
 
 <template>
@@ -15,12 +15,12 @@ const { cardIds, selectedCardId, cards } = storeToRefs(cardStore)
       Cards from board
     </h2>
     <div
-      v-if="cardIds.length > 0"
+      v-if="playableCardIds.length > 0"
       class="max-h-[34rem] overflow-y-auto p-4"
     >
       <div class="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
         <div
-          v-for="cardId in cardIds"
+          v-for="cardId in playableCardIds"
           :key="cardId"
           :class="{ 'ring-2 ring-blue-500 ring-offset-2': selectedCardId === cardId, 'opacity-50 pointer-events-none': cards.get(cardId)?.user }"
           @click="cardStore.selectCard(cardId)"

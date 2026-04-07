@@ -3,11 +3,8 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 import type { IGrid, IGridCell } from '@/types'
+import { DEFAULT_GRID_HEIGHT, DEFAULT_GRID_WIDTH, START_CARD_ID } from '@/game-core/constants'
 import { useCardStore } from './cardStore'
-
-const DEFAULT_GRID_WIDTH = 5
-const DEFAULT_GRID_HEIGHT = 5
-
 
 function createGridCells(width: number, height: number): IGridCell[] {
   const cells: IGridCell[] = []
@@ -24,14 +21,28 @@ function createGridCells(width: number, height: number): IGridCell[] {
   return cells
 }
 
+function getCellIndex(x: number, y: number, width: number) {
+  return y * width + x
+}
+
+function placeStartCard(grid: IGrid) {
+  const startCellIndex = getCellIndex(grid.size.width - 2, Math.floor((grid.size.height - 1) / 2), grid.size.width)
+  const startCell = grid.cells[startCellIndex]
+  if (startCell) {
+    startCell.card = START_CARD_ID
+  }
+}
+
 function createGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT): IGrid {
-  return {
+  const grid: IGrid = {
     size: {
       width,
       height,
     },
     cells: createGridCells(width, height),
   }
+  placeStartCard(grid)
+  return grid
 }
 
 export const useGridStore = defineStore('grid', () => {
@@ -42,7 +53,7 @@ export const useGridStore = defineStore('grid', () => {
     grid.value = createGrid(width, height)
   }
 
-  function findCellId(cellId: string) {
+  function getCellById(cellId: string) {
     return grid.value.cells.find(c => c.id === cellId)
   }
 
@@ -50,7 +61,7 @@ export const useGridStore = defineStore('grid', () => {
     if (!userId.trim()) {
       return
     }
-    const cell = findCellId(cellId)
+    const cell = getCellById(cellId)
     if (cell && !cell.card) {
       cell.card = cardId
       cardStore.markCardAsPlaced(cardId, userId)
