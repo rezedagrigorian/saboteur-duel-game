@@ -8,7 +8,7 @@ const gridStore = useGridStore()
 
 <template>
   <div
-    class="grid gap-1.5 bg-red-100 p-2 min-w-[30rem]"
+    class="grid gap-1.5 p-2 min-w-[30rem]"
     :style="{
       gridTemplateColumns: `repeat(${gridStore.grid.size.width}, 100px)`,
     }"
