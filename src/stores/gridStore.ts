@@ -97,6 +97,7 @@ export const useGridStore = defineStore('grid', () => {
 
   function trace(cardId: string, cell: IGridCell): boolean {
     const queue: ITraceChunk[] = []
+    const visited = new Set<string>()
 
     const startPorts = cardStore.getPortsByCardID(cardId)
     for (const [index, port] of startPorts.entries()) {
@@ -109,11 +110,18 @@ export const useGridStore = defineStore('grid', () => {
         })
       }
     }
-    console.log('startPorts', queue)    
+    console.log('startPorts', queue)
 
     while (queue.length > 0) {
       console.log('queue', JSON.stringify(queue))
       const { portIndex, cardID, x, y } = queue.shift()!
+
+      const stateKey = `${x},${y},${cardID},${portIndex}`
+      if (visited.has(stateKey)) {
+        continue
+      }
+      visited.add(stateKey)
+
       if (cardID === START_CARD_ID) {
         console.log('found start card')
         return true
