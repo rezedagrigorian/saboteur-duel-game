@@ -36,7 +36,7 @@ const PORT_POSITIONS = [
     v-if="card"
     role="button"
     tabindex="0"
-    class="relative grid size-[72px] cursor-pointer place-items-center rounded-lg border text-xs text-neutral-800 transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ring-offset-2"
+    class="relative grid h-[80px] w-[60px] cursor-pointer rounded border"
     :style="{
       backgroundColor: card.isGolden ? 'gold' : 'white',
     }"
@@ -56,10 +56,10 @@ const PORT_POSITIONS = [
           border: port.isTroll ? '1px dashed black' : 'none',
         }"
       >
-        <span class="text-[10px] font-bold text-white drop-shadow-sm">{{ index }}</span>
+        <span class="text-[10px] font-bold text-white">{{ index }}</span>
         <span
           v-if="port.isGold || port.isTroll"
-          class="mt-px text-[7px] font-semibold text-white drop-shadow-sm"
+          class="text-[7px] font-semibold text-white"
         >
           {{ port.isGold ? 'G' : '' }}{{ port.isTroll ? 'T' : '' }}
         </span>

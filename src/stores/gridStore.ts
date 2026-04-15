@@ -25,6 +25,8 @@ interface ITraceChunk {
 
 const PORT_MAPPING = [2, 3, 0, 1] as const
 
+// 0 -> 2, 1 -> 3, 2 -> 0, 3 -> 1
+
 const cardStore = useCardStore()
 const startCard = cardStore.getCardById(START_CARD_ID)
 
@@ -48,7 +50,7 @@ function getCellIndex(x: number, y: number, width: number) {
 }
 
 function placeStartCard(grid: IGrid) {
-  const startCellIndex = getCellIndex(grid.size.width - 2, Math.floor((grid.size.height - 1) / 2), grid.size.width)
+  const startCellIndex = getCellIndex(grid.size.width - 9, Math.floor((grid.size.height - 1) / 2), grid.size.width)
   const startCell = grid.cells[startCellIndex]
   if (startCell) {
     startCell.card = START_CARD_ID
@@ -94,6 +96,25 @@ export const useGridStore = defineStore('grid', () => {
     }
     return undefined
   }
+
+  function isCompatibleWithNeighbors(cardId: string, cell: IGridCell): boolean {
+    const ports = cardStore.getPortsByCardID(cardId)
+
+    for (const [index, port] of ports.entries()) {
+      const neighbor = getNeighborCardByDirection(cell.coordinate.x, cell.coordinate.y, index)
+      if (!neighbor) {
+        continue
+      }
+      const neighborPorts = cardStore.getPortsByCardID(neighbor.id)
+      const neighborHasPort = neighborPorts[PORT_MAPPING[index]] !== null
+
+      if (port && !neighborHasPort || !port && neighborHasPort) {
+        return false
+      }
+    }
+    return true
+  }
+
 
   function trace(cardId: string, cell: IGridCell): boolean {
     const queue: ITraceChunk[] = []
@@ -155,6 +176,10 @@ export const useGridStore = defineStore('grid', () => {
     const cell = getCellById(cellId)
     if(!cell) return
     
+    if (!isCompatibleWithNeighbors(cardId, cell)) {
+      return
+    }
+
     if (!trace(cardId, cell)) {
       return
     }

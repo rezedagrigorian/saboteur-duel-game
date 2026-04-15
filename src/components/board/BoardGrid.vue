@@ -10,7 +10,7 @@ const gridStore = useGridStore()
   <div
     class="grid gap-1.5 p-2 min-w-[30rem]"
     :style="{
-      gridTemplateColumns: `repeat(${gridStore.grid.size.width}, 100px)`,
+      gridTemplateColumns: `repeat(${gridStore.grid.size.width}, 80px)`,
     }"
   >
     <BoardCell
