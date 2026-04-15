@@ -2,12 +2,30 @@ import { v4 as uuidv4 } from 'uuid'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+import type { ICard } from '@/types'
 import type { IGrid, IGridCell } from '@/types'
+
+import { DEFAULT_GRID_HEIGHT, DEFAULT_GRID_WIDTH, START_CARD_ID } from '@/game-core/constants'
 import { useCardStore } from './cardStore'
 
-const DEFAULT_GRID_WIDTH = 5
-const DEFAULT_GRID_HEIGHT = 5
+const DIRECTIONS = [
+    { dx: -1, dy: 0 }, // левый сосед
+    { dx: 0, dy: -1 }, // верхний сосед
+    { dx: 1, dy: 0 }, // правый сосед
+    { dx: 0, dy: 1 }, // нижний сосед
+] as const
 
+interface ITraceChunk {
+  portIndex: number
+  cardID: string
+
+  x: number
+  y: number
+}
+
+const PORT_MAPPING = [2, 3, 0, 1] as const
+
+// 0 -> 2, 1 -> 3, 2 -> 0, 3 -> 1
 
 function createGridCells(width: number, height: number): IGridCell[] {
   const cells: IGridCell[] = []
@@ -24,14 +42,28 @@ function createGridCells(width: number, height: number): IGridCell[] {
   return cells
 }
 
+function getCellIndex(x: number, y: number, width: number) {
+  return y * width + x
+}
+
+function placeStartCard(grid: IGrid) {
+  const startCellIndex = getCellIndex(grid.size.width - 9, Math.floor((grid.size.height - 1) / 2), grid.size.width)
+  const startCell = grid.cells[startCellIndex]
+  if (startCell) {
+    startCell.card = START_CARD_ID
+  }
+}
+
 function createGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT): IGrid {
-  return {
+  const grid: IGrid = {
     size: {
       width,
       height,
     },
     cells: createGridCells(width, height),
   }
+  placeStartCard(grid)
+  return grid
 }
 
 export const useGridStore = defineStore('grid', () => {
@@ -42,16 +74,114 @@ export const useGridStore = defineStore('grid', () => {
     grid.value = createGrid(width, height)
   }
 
-  function findCellId(cellId: string) {
+  function getCellById(cellId: string) {
     return grid.value.cells.find(c => c.id === cellId)
+  }
+
+  function getCell(x: number, y: number) {
+    return grid.value.cells.find(c => c.coordinate.x === x && c.coordinate.y === y)
+  }
+
+  function getNeighborCardByDirection(x: number, y: number, directionIndex: number) : ICard | undefined {
+    const direction = DIRECTIONS[directionIndex]
+    if (!direction) {
+      return undefined
+    }
+    const neighbor = getCell(x + direction.dx, y + direction.dy)
+    if (neighbor && neighbor.card) {
+      return cardStore.getCardById(neighbor.card)
+    }
+    return undefined
+  }
+
+  function isCompatibleWithNeighbors(cardId: string, cell: IGridCell): boolean {
+    const ports = cardStore.getPortsByCardID(cardId)
+
+    for (const [index, port] of ports.entries()) {
+      const neighbor = getNeighborCardByDirection(cell.coordinate.x, cell.coordinate.y, index)
+      if (!neighbor) {
+        continue
+      }
+      const neighborPorts = cardStore.getPortsByCardID(neighbor.id)
+      const neighborHasPort = neighborPorts[PORT_MAPPING[index]] !== null
+
+      if (port && !neighborHasPort || !port && neighborHasPort) {
+        return false
+      }
+    }
+    return true
+  }
+
+
+  function trace(cardId: string, cell: IGridCell): boolean {
+    const queue: ITraceChunk[] = []
+    const visited = new Set<string>()
+
+    const startPorts = cardStore.getPortsByCardID(cardId)
+    for (const [index, port] of startPorts.entries()) {
+      if (port) {
+        queue.push({
+          portIndex: index,
+          cardID: cardId,
+          x: cell.coordinate.x,
+          y: cell.coordinate.y,
+        })
+      }
+    }
+    console.log('startPorts', queue)
+
+    while (queue.length > 0) {
+      console.log('queue', JSON.stringify(queue))
+      const { portIndex, cardID, x, y } = queue.shift()!
+
+      const stateKey = `${x},${y},${cardID},${portIndex}`
+      if (visited.has(stateKey)) {
+        continue
+      }
+      visited.add(stateKey)
+
+      if (cardID === START_CARD_ID) {
+        console.log('found start card')
+        return true
+      }
+      const neighbour = getNeighborCardByDirection(x, y, portIndex)
+      if (!neighbour) {
+        continue
+      }
+      const outPorts = cardStore.getOutPortsByCardIDAndPortIndex(neighbour.id, PORT_MAPPING[portIndex])
+      if (!outPorts) {
+        continue
+      }
+      outPorts.forEach((outPort, index) => {
+        if (outPort) {
+          queue.push({
+            portIndex: index,
+            cardID: neighbour.id,
+            x: x + DIRECTIONS[portIndex].dx,
+            y: y + DIRECTIONS[portIndex].dy,
+          })
+        }
+      })
+    }
+    return false
   }
 
   function assignCardToCell(cellId: string, cardId: string, userId: string) {
     if (!userId.trim()) {
       return
     }
-    const cell = findCellId(cellId)
-    if (cell && !cell.card) {
+    const cell = getCellById(cellId)
+    if(!cell) return
+    
+    if (!isCompatibleWithNeighbors(cardId, cell)) {
+      return
+    }
+
+    if (!trace(cardId, cell)) {
+      return
+    }
+
+    if (!cell.card) {
       cell.card = cardId
       cardStore.markCardAsPlaced(cardId, userId)
       cardStore.clearSelection()

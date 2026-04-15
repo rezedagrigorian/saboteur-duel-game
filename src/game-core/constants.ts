@@ -1,0 +1,3 @@
+export const DEFAULT_GRID_WIDTH = 11
+export const DEFAULT_GRID_HEIGHT = 7
+export const START_CARD_ID = '63782181-d535-470e-90b2-44913a553332'

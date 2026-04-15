@@ -2,7 +2,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-import type { ICard } from '@/types'
+import type { ICard, ICardPort } from '@/types'
+import { START_CARD_ID } from '@/game-core/constants'
 import cardsJson from './cards.json'
 
 export const useCardStore = defineStore('cards', () => {
@@ -10,6 +11,7 @@ export const useCardStore = defineStore('cards', () => {
     new Map((cardsJson as ICard[]).map(card => [card.id, card] as [string, ICard]))
   )
   const cardIds = computed(() => Array.from(cards.value.keys()))
+  const playableCardIds = computed(() => cardIds.value.filter(id => id !== START_CARD_ID))
   const selectedCardId = ref<string | null>(null)
 
 
@@ -35,13 +37,37 @@ export const useCardStore = defineStore('cards', () => {
     selectedCardId.value = null
   }
 
+  function getPortsByCardID(id: string) {
+    const card = getCardById(id)
+    return card ? card.ports : []
+  }
+
+  function getOutPortsByCardIDAndPortIndex(id: string, portIndex: number) {
+    const card = getCardById(id)
+    if (!card) return undefined
+    const ports = card.ports
+  
+    const inPort: ICardPort | undefined = ports[portIndex]
+    if (!inPort) return undefined
+
+    return ports.map((port, index) => {
+      if (port && port.group === inPort.group && index !== portIndex) {
+        return port
+      }
+      return undefined
+    })
+  }
+  
   return {
     cards,
     cardIds,
+    playableCardIds,
     selectedCardId,
     getCardById,
     selectCard,
     markCardAsPlaced,
     clearSelection,
+    getPortsByCardID,
+    getOutPortsByCardIDAndPortIndex
   }
 })

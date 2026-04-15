@@ -12,11 +12,15 @@ const props = defineProps<{
 const { getCardById } = useCardStore()
 const card = computed<ICard | undefined>(() => getCardById(props.cardId))
 
-const PORT_COLOR_MAP = [
-  'red',
-  'green',
-  'blue',
-]
+const PORT_GROUP_CLASS: Record<number, string> = {
+  1: 'bg-red-500',
+  2: 'bg-green-500',
+  3: 'bg-blue-500',
+}
+
+function portGroupClass(group: number): string {
+  return PORT_GROUP_CLASS[group] ?? 'bg-neutral-400'
+}
 
 const PORT_POSITIONS = [
   'left-[-8px] top-1/2 -translate-y-1/2',      // 0 - слева по центру
@@ -32,7 +36,7 @@ const PORT_POSITIONS = [
     v-if="card"
     role="button"
     tabindex="0"
-    class="relative grid size-[72px] cursor-pointer place-items-center rounded-lg border text-xs text-neutral-800 transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ring-offset-2"
+    class="relative grid h-[80px] w-[60px] cursor-pointer rounded border"
     :style="{
       backgroundColor: card.isGolden ? 'gold' : 'white',
     }"
@@ -40,20 +44,25 @@ const PORT_POSITIONS = [
     <div
       v-for="(port, index) in card.ports"
       :key="card.id + '-' + index"
-      class="absolute w-4 h-4"
+      class="absolute flex size-5 items-center justify-center"
       :class="PORT_POSITIONS[index]"
     >
       <div
         v-if="port"
-        :key="port.group"
-        class="w-4 h-4"
+        :key="`${card.id}-${index}-g${port.group}`"
+        class="flex size-5 flex-col items-center justify-center rounded-sm leading-none"
+        :class="portGroupClass(port.group)"
         :style="{
-          backgroundColor: PORT_COLOR_MAP[port.group],
           border: port.isTroll ? '1px dashed black' : 'none',
         }"
       >
-        {{ port.isGold ? 'G' : '' }}
-        {{ port.isTroll ? 'T' : '' }}
+        <span class="text-[10px] font-bold text-white">{{ index }}</span>
+        <span
+          v-if="port.isGold || port.isTroll"
+          class="text-[7px] font-semibold text-white"
+        >
+          {{ port.isGold ? 'G' : '' }}{{ port.isTroll ? 'T' : '' }}
+        </span>
       </div>
     </div>
   </div>

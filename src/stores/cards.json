@@ -48,6 +48,30 @@
     "user": null
   },
   {
+    "id": "544cbca6-131a-48c5-9d7f-014e3fbd7afb",
+    "ports": [
+      { "group": 2, "isTroll": false, "isGold": false },
+      { "group": 2, "isTroll": false, "isGold": false },
+      { "group": 2, "isTroll": false, "isGold": false },
+      { "group": 2, "isTroll": false, "isGold": false }
+    ],
+    "rotation": true,
+    "isGolden": false,
+    "user": null
+  },
+  {
+    "id": "88e1af39-04f7-4329-9b8e-130cc210171d",
+    "ports": [
+      { "group": 2, "isTroll": false, "isGold": false },
+      { "group": 2, "isTroll": false, "isGold": false },
+      { "group": 2, "isTroll": false, "isGold": false },
+      { "group": 2, "isTroll": false, "isGold": false }
+    ],
+    "rotation": true,
+    "isGolden": false,
+    "user": null
+  },
+  {
     "id": "33686672-4250-4a54-990c-a4de4e82853d",
     "ports": [
       { "group": 1, "isTroll": true, "isGold": true },
@@ -117,6 +141,30 @@
     ],
     "rotation": true,
     "isGolden": true,
+    "user": null
+  },
+  {
+    "id": "63782181-d535-470e-90b2-44913a553332",
+    "ports": [
+      { "group": 1, "isTroll": false, "isGold": false },
+      { "group": 1, "isTroll": false, "isGold": false },
+      { "group": 1, "isTroll": false, "isGold": false },
+      { "group": 1, "isTroll": false, "isGold": false }
+    ],
+    "rotation": false,
+    "isGolden": false,
+    "user": null
+  },
+  {
+    "id":"37a33146-0a31-489a-80a5-97105743058e",
+    "ports": [
+      { "group": 1, "isTroll": false, "isGold": false },
+      { "group": 1, "isTroll": false, "isGold": false },
+      { "group": 2, "isTroll": false, "isGold": false },
+      null
+    ],
+    "rotation": false,
+    "isGolden": false,
     "user": null
   }
 ]
