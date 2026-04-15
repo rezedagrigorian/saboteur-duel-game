@@ -27,9 +27,6 @@ const PORT_MAPPING = [2, 3, 0, 1] as const
 
 // 0 -> 2, 1 -> 3, 2 -> 0, 3 -> 1
 
-const cardStore = useCardStore()
-const startCard = cardStore.getCardById(START_CARD_ID)
-
 function createGridCells(width: number, height: number): IGridCell[] {
   const cells: IGridCell[] = []
 
