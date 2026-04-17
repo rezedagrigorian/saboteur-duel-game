@@ -7,9 +7,7 @@
       { "group": 2, "isTroll": true, "isGold": false },
       null
     ],
-    "rotation": false,
-    "isGolden": false,
-    "user": null
+    "isGolden": false
   },
   {
     "id": "f56a786c-1c01-4c85-be6d-dd7347a7f73b",
@@ -19,9 +17,7 @@
       { "group": 3, "isTroll": false, "isGold": true },
       null
     ],
-    "rotation": true,
-    "isGolden": true,
-    "user": null
+    "isGolden": true
   },
   {
     "id": "4cdaca13-7ca4-48bc-9d37-aab3b7eb00e7",
@@ -31,9 +27,7 @@
       { "group": 1, "isTroll": true, "isGold": false },
       { "group": 2, "isTroll": false, "isGold": false }
     ],
-    "rotation": false,
-    "isGolden": false,
-    "user": null
+    "isGolden": false
   },
   {
     "id": "6aee5eb5-7a9a-4d36-9d87-221de678f1f1",
@@ -43,9 +37,7 @@
       { "group": 2, "isTroll": false, "isGold": false },
       { "group": 2, "isTroll": false, "isGold": false }
     ],
-    "rotation": true,
-    "isGolden": false,
-    "user": null
+    "isGolden": false
   },
   {
     "id": "544cbca6-131a-48c5-9d7f-014e3fbd7afb",
@@ -55,9 +47,7 @@
       { "group": 2, "isTroll": false, "isGold": false },
       { "group": 2, "isTroll": false, "isGold": false }
     ],
-    "rotation": true,
-    "isGolden": false,
-    "user": null
+    "isGolden": false
   },
   {
     "id": "88e1af39-04f7-4329-9b8e-130cc210171d",
@@ -67,9 +57,7 @@
       { "group": 2, "isTroll": false, "isGold": false },
       { "group": 2, "isTroll": false, "isGold": false }
     ],
-    "rotation": true,
-    "isGolden": false,
-    "user": null
+    "isGolden": false
   },
   {
     "id": "33686672-4250-4a54-990c-a4de4e82853d",
@@ -79,9 +67,7 @@
       null,
       { "group": 1, "isTroll": true, "isGold": true }
     ],
-    "rotation": false,
-    "isGolden": true,
-    "user": null
+    "isGolden": true
   },
   {
     "id": "ddb1ca7e-c60a-455a-b628-b942885481b0",
@@ -91,9 +77,7 @@
       { "group": 3, "isTroll": false, "isGold": true },
       { "group": 1, "isTroll": false, "isGold": false }
     ],
-    "rotation": true,
-    "isGolden": false,
-    "user": null
+    "isGolden": false
   },
   {
     "id": "c11a4776-8f3b-409b-a3ea-fa60c9a27d13",
@@ -103,9 +87,7 @@
       null,
       null
     ],
-    "rotation": false,
-    "isGolden": false,
-    "user": null
+    "isGolden": false
   },
   {
     "id": "900f6265-f9d6-4e67-9193-b58449cb7354",
@@ -115,9 +97,7 @@
       { "group": 1, "isTroll": false, "isGold": true },
       null
     ],
-    "rotation": true,
-    "isGolden": true,
-    "user": null
+    "isGolden": true
   },
   {
     "id": "d95376ce-37a1-4229-8dd4-a60a4cb93323",
@@ -127,9 +107,7 @@
       { "group": 3, "isTroll": true, "isGold": false },
       { "group": 3, "isTroll": true, "isGold": false }
     ],
-    "rotation": false,
-    "isGolden": false,
-    "user": null
+    "isGolden": false
   },
   {
     "id": "b7b71187-f18f-475b-843f-7de5b4e10eab",
@@ -139,9 +117,7 @@
       { "group": 2, "isTroll": false, "isGold": true },
       { "group": 3, "isTroll": true, "isGold": false }
     ],
-    "rotation": true,
-    "isGolden": true,
-    "user": null
+    "isGolden": true
   },
   {
     "id": "63782181-d535-470e-90b2-44913a553332",
@@ -151,9 +127,7 @@
       { "group": 1, "isTroll": false, "isGold": false },
       { "group": 1, "isTroll": false, "isGold": false }
     ],
-    "rotation": false,
-    "isGolden": false,
-    "user": null
+    "isGolden": false
   },
   {
     "id":"37a33146-0a31-489a-80a5-97105743058e",
@@ -163,8 +137,6 @@
       { "group": 2, "isTroll": false, "isGold": false },
       null
     ],
-    "rotation": false,
-    "isGolden": false,
-    "user": null
+    "isGolden": false
   }
 ]

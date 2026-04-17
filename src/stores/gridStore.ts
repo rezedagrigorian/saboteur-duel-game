@@ -42,11 +42,11 @@ function createGridCells(width: number, height: number): IGridCell[] {
   return cells
 }
 
-function getCellIndex(x: number, y: number, width: number) {
+function getCellIndex(x: number, y: number, width: number): number {
   return y * width + x
 }
 
-function placeStartCard(grid: IGrid) {
+function placeStartCard(grid: IGrid): undefined {
   const startCellIndex = getCellIndex(grid.size.width - 9, Math.floor((grid.size.height - 1) / 2), grid.size.width)
   const startCell = grid.cells[startCellIndex]
   if (startCell) {
@@ -70,15 +70,15 @@ export const useGridStore = defineStore('grid', () => {
   const grid = ref<IGrid>(createGrid())
   const cardStore = useCardStore()
 
-  function initializeGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT) {
+  function initializeGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT):void {
     grid.value = createGrid(width, height)
   }
 
-  function getCellById(cellId: string) {
+  function getCellById(cellId: string): IGridCell | undefined {
     return grid.value.cells.find(c => c.id === cellId)
   }
 
-  function getCell(x: number, y: number) {
+  function getCell(x: number, y: number): IGridCell | undefined {
     return grid.value.cells.find(c => c.coordinate.x === x && c.coordinate.y === y)
   }
 
@@ -113,7 +113,7 @@ export const useGridStore = defineStore('grid', () => {
   }
 
 
-  function trace(cardId: string, cell: IGridCell): boolean {
+  function trace(cardId: string, cell: IGridCell): boolean | undefined {
     const queue: ITraceChunk[] = []
     const visited = new Set<string>()
 
@@ -128,10 +128,8 @@ export const useGridStore = defineStore('grid', () => {
         })
       }
     }
-    console.log('startPorts', queue)
 
     while (queue.length > 0) {
-      console.log('queue', JSON.stringify(queue))
       const { portIndex, cardID, x, y } = queue.shift()!
 
       const stateKey = `${x},${y},${cardID},${portIndex}`
@@ -141,7 +139,6 @@ export const useGridStore = defineStore('grid', () => {
       visited.add(stateKey)
 
       if (cardID === START_CARD_ID) {
-        console.log('found start card')
         return true
       }
       const neighbour = getNeighborCardByDirection(x, y, portIndex)
@@ -172,7 +169,7 @@ export const useGridStore = defineStore('grid', () => {
     }
     const cell = getCellById(cellId)
     if(!cell) return
-    
+
     if (!isCompatibleWithNeighbors(cardId, cell)) {
       return
     }

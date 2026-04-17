@@ -9,10 +9,20 @@ export type ICardRotation = boolean
 /** Ровно четыре порта: по одному на каждую сторону карты. */
 export type ICardPorts = [ICardPort?, ICardPort?, ICardPort?, ICardPort?]
 
-export interface ICard {
+export enum CardStatus {
+  Deck = 'deck',
+  Hand = 'hand',
+  Placed = 'placed',
+}
+
+export interface ICardBase {
   id: string
   ports: ICardPorts
-  rotation: ICardRotation
   isGolden: boolean
-  user: string | null
+}
+
+export interface ICard extends ICardBase {
+  status: CardStatus
+  owner: string | null
+  rotation: ICardRotation
 }

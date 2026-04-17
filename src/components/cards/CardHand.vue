@@ -1,9 +1,20 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useCardStore } from '@/stores/cardStore'
+import { CardStatus } from '@/types/card'
 import Card from './Card.vue'
+
+const props = defineProps<{
+  userId: string
+}>()
+
 const cardStore = useCardStore()
-const { playableCardIds, selectedCardId, cards } = storeToRefs(cardStore)
+const { selectedCardId, cards } = storeToRefs(cardStore)
+
+const playerCards = computed(() =>
+  Array.from(cards.value.values()).filter(card =>  card.owner === props.userId)
+)
 </script>
 
 <template>
@@ -12,17 +23,18 @@ const { playableCardIds, selectedCardId, cards } = storeToRefs(cardStore)
     aria-label="cards on the board"
   >
     <div
-      v-if="playableCardIds.length > 0"
+      v-if="playerCards.length > 0"
       class="flex flex-wrap gap-6"
     >
       <div
-        v-for="cardId in playableCardIds"
-        :key="cardId"
-        :class="{ 'ring-2 ring-blue-500 ring-offset-2': selectedCardId === cardId, 'opacity-50 pointer-events-none': cards.get(cardId)?.user }"
-        @click="cardStore.selectCard(cardId)"
+        v-for="card in playerCards"
+        :key="card.id"
+        :class="{ 'ring-2 ring-blue-500 ring-offset-2': selectedCardId === card.id,
+                  'opacity-50 pointer-events-none': card.status === CardStatus.Placed }"
+        @click="cardStore.selectCard(card.id)"
       >
         <Card
-          :card-id="cardId"
+          :card-id="card.id"
         />
       </div>
     </div>
