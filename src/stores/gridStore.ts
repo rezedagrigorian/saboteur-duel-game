@@ -17,10 +17,10 @@ import { usePlayerStore } from './playerStore'
 
 
 const DIRECTIONS = [
-    { dx: -1, dy: 0 }, // левый сосед
-    { dx: 0, dy: -1 }, // верхний сосед
-    { dx: 1, dy: 0 }, // правый сосед
-    { dx: 0, dy: 1 }, // нижний сосед
+  { dx: -1, dy: 0 }, // левый сосед
+  { dx: 0, dy: -1 }, // верхний сосед
+  { dx: 1, dy: 0 }, // правый сосед
+  { dx: 0, dy: 1 }, // нижний сосед
 ] as const
 
 interface ITraceChunk {
