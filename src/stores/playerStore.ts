@@ -35,5 +35,11 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
 
-  return { players, currentPlayerId, currentPlayer, currentPlayerColor, setGold }
+  return { 
+    players,
+    currentPlayerId,
+    currentPlayer,
+    currentPlayerColor,
+    setGold
+  }
 })

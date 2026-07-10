@@ -4,6 +4,7 @@ import pluginVue from 'eslint-plugin-vue'
 import tseslint from 'typescript-eslint'
 import vueParser from 'vue-eslint-parser'
 import unusedImports from 'eslint-plugin-unused-imports'
+import stylistic from '@stylistic/eslint-plugin'
 
 
 export default tseslint.config(
@@ -35,8 +36,10 @@ export default tseslint.config(
     },
     plugins: {
       'unused-imports': unusedImports,
+      '@stylistic': stylistic,
     },
     rules: {
+      '@stylistic/indent': ['error', 2],
       quotes: ['error', 'single', { avoidEscape: true }],
       semi: ['error', 'never'],
       eqeqeq: ['error', 'always'],

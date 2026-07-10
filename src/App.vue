@@ -4,8 +4,8 @@ import AppShell from './components/layout/AppShell.vue'
 
 const PiniaColadaDevtools = import.meta.env.DEV
   ? defineAsyncComponent(() =>
-      import('@pinia/colada-devtools').then((m) => m.PiniaColadaDevtools),
-    )
+    import('@pinia/colada-devtools').then((m) => m.PiniaColadaDevtools),
+  )
   : null
 </script>
 
