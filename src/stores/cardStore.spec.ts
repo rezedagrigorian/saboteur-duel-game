@@ -3,27 +3,8 @@ import { setActivePinia, createPinia } from 'pinia'
 import { useCardStore } from './cardStore'
 import { LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID } from '@/game-core/constants'
 import { CardStatus } from '@/types/card'
-import type { ICard, ICardPorts } from '@/types'
-
-function makeCard(overrides: Partial<ICard> = {}): ICard {
-  return {
-    id: 'test-card',
-    ports: [
-      { group: 1 },
-      { group: 2 },
-      { group: 3 },
-      { group: 4 },
-    ],
-    action: null,
-    isGolden: false,
-    style: {},
-    status: CardStatus.Deck,
-    owner: null,
-    rotation: false,
-    isRevealed: false,
-    ...overrides,
-  }
-}
+import type { ICardPorts } from '@/types'
+import makeCard from '@/test-utils/makeCard'
 
 describe('cardStore', () => {
   beforeEach(() => {
