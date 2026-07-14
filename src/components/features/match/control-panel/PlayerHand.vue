@@ -10,16 +10,22 @@ const props = defineProps<{
 }>()
 
 const playerStore = usePlayerStore()
-const gold = computed(() =>
-  playerStore.players.find(p => p.id === props.playerId)?.gold ?? 0
+const player = computed(() =>
+  playerStore.players.find(p => p.id === props.playerId)
 )
+const gold = computed(() => player.value?.gold ?? 0)
 </script>
 
 <template>
   <div class="m-3 flex flex-col gap-4 border border-block-border bg-board-surface text-left pr-2">
     <div class="flex flex-wrap items-center gap-4 justify-between sm:justify-start">
-      <div class="clip-btn shrink-0">
-        You
+      <div class="clip-btn flex shrink-0 items-center gap-2">
+        <span
+          class="size-2.5 shrink-0 rounded-full"
+          :class="player?.color === 2 ? 'bg-purple-400' : 'bg-yellow-400'"
+          aria-hidden="true"
+        />
+        {{ player?.name ?? 'You' }}
       </div>
       <div
         class="flex shrink-0 items-center gap-1.5 text-base text-block-border"

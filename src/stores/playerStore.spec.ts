@@ -59,4 +59,14 @@ describe('playerStore', () => {
     store.players.forEach(player => 
       expect(player.gold).toBe(0))
   })
+
+  it('endTurn passes the turn to the next player and back', () => {
+    const store = usePlayerStore()
+    store.endTurn()
+    expect(store.currentPlayer?.id).toBe('player2')
+    expect(store.currentPlayerColor).toBe(1)
+    store.endTurn()
+    expect(store.currentPlayer?.id).toBe('player1')
+    expect(store.currentPlayerColor).toBe(2)
+  })
 })
