@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-import type { ICard } from '@/types'
+import type { ICard, IPlayer } from '@/types'
 import type { IGrid, IGridCell } from '@/types'
 
 import { 
@@ -138,12 +138,12 @@ export const useGridStore = defineStore('grid', () => {
     return true
   }
 
-  function goldTrace(): number {
+  function goldTrace(player:IPlayer) {
     const queue: ITraceChunk[] = []
     const visited = new Set<string>()
     const countedGold = new Set<string>()
 
-    const entranceCardId = playerStore.currentPlayer?.entranceCardId
+    const entranceCardId = player.entranceCardId
     if (!entranceCardId) return 0
 
     const startCardCell = grid.value.cells.find(c => c.card === entranceCardId)
@@ -181,7 +181,7 @@ export const useGridStore = defineStore('grid', () => {
       const inPort = neighbour.ports[PORT_MAPPING[portIndex]]
       if (!inPort) continue
       if (inPort.isRat) continue
-      if (inPort.door && inPort.door !== playerStore.currentPlayerColor) continue
+      if (inPort.door && inPort.door !== player.color) continue
 
       if (neighbour.gold) {
         const goldKey = `${neighbour.id}:${inPort.group}`
@@ -207,9 +207,8 @@ export const useGridStore = defineStore('grid', () => {
         }
       })
     }
-    if (playerStore.currentPlayer) {
-      playerStore.setGold(playerStore.currentPlayer.id, total)
-    }
+
+    playerStore.setGold(player.id, total)
     return total
   }
 
@@ -270,11 +269,11 @@ export const useGridStore = defineStore('grid', () => {
   }
 
   function assignCardToCell(cellId: string, cardId: string, playerId: string) {
-    if (!playerId.trim()) {
-      return
-    }
+    if(playerId !== playerStore.currentPlayerId) return
+
     const cell = getCellById(cellId)
     if(!cell) return
+    if (cell.card) return
 
     if (!isCompatibleWithNeighbors(cardId, cell)) {
       return
@@ -284,13 +283,14 @@ export const useGridStore = defineStore('grid', () => {
       return
     }
 
-    if (!cell.card) {
-      cell.card = cardId
-      cardStore.markCardAsPlaced(cardId, playerId)
-      cardStore.clearSelection()
+    cell.card = cardId
+    cardStore.markCardAsPlaced(cardId, playerId)
+    cardStore.clearSelection()
 
-      goldTrace()
-    }
+    playerStore.players.forEach(( player => {
+      goldTrace(player)
+    }))
+    playerStore.endTurn()
   }
 
   return { grid, initializeGrid, assignCardToCell }

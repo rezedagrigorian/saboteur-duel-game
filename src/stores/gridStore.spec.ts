@@ -77,61 +77,70 @@ describe('gridStore', () => {
     function setupCardAt(x: number, y: number, ports: ICardPorts, id = 'my-card') {
       const gridStore = useGridStore()
       const cardStore = useCardStore()
+      const playerStore = usePlayerStore()
+
       cardStore.cards.set(id, makeCard({ id, ports }))
       cardStore.selectCard(id)
       const cell = gridStore.grid.cells.find(c => c.coordinate.x === x && c.coordinate.y === y)!
-      return { gridStore, cardStore, cell }
+      return { gridStore, cardStore, cell, playerStore }
     }
 
     it('places the card when all conditions are met', () => {
-      const { gridStore, cardStore, cell } = setupCardAt(3, 2, LEFT_PORT)
+      const { gridStore, cardStore, cell, playerStore } = setupCardAt(3, 2, LEFT_PORT)
 
       gridStore.assignCardToCell(cell.id, 'my-card', 'player1')
 
       expect(cell.card).toBe('my-card')
       expect(cardStore.getCardById('my-card')?.status).toBe(CardStatus.Placed)
       expect(cardStore.selectedCardId).toBeNull()
+      expect(playerStore.currentPlayerId).toBe('player2')
     })
 
-    it('does not place a card when playerId is empty', () => {
-      const { gridStore, cardStore, cell } = setupCardAt(3, 2, LEFT_PORT)
+    it("does not place a card when it is not the player's turn", () => {
+      const { gridStore, cardStore, cell, playerStore } = setupCardAt(3, 2, LEFT_PORT)
 
-      gridStore.assignCardToCell(cell.id, 'my-card', '')
+      gridStore.assignCardToCell(cell.id, 'my-card', 'player2')
 
       expect(cell.card).toBeUndefined()
       expect(cardStore.getCardById('my-card')?.status).toBe(CardStatus.Deck)
       expect(cardStore.selectedCardId).toBe('my-card')
+      expect(playerStore.currentPlayerId).toBe('player1')
     })
 
     it('does not place a card when ports do not match the neighbor', () => {
-      const { gridStore, cardStore, cell } = setupCardAt(3, 2, TOP_PORT)
+      const { gridStore, cardStore, cell, playerStore } = setupCardAt(3, 2, TOP_PORT)
 
       gridStore.assignCardToCell(cell.id, 'my-card', 'player1')
 
       expect(cell.card).toBeUndefined()
       expect(cardStore.getCardById('my-card')?.status).toBe(CardStatus.Deck)
+      expect(playerStore.currentPlayerId).toBe('player1')
     })
 
     it('does not place a card when there is no path to the entrance', () => {
-      const { gridStore, cardStore, cell } = setupCardAt(10, 7, LEFT_PORT)
+      const { gridStore, cardStore, cell, playerStore } = setupCardAt(10, 7, LEFT_PORT)
 
       gridStore.assignCardToCell(cell.id, 'my-card', 'player1')
 
       expect(cell.card).toBeUndefined()
       expect(cardStore.getCardById('my-card')?.status).toBe(CardStatus.Deck)
+      expect(playerStore.currentPlayerId).toBe('player1')
     })
 
     it('does not overwrite an occupied cell', () => {
       const { gridStore, cardStore, cell } = setupCardAt(3, 2, LEFT_PORT, 'card-a')
+      const playerStore = usePlayerStore()
       cardStore.cards.set('card-b', makeCard({ id: 'card-b', ports: LEFT_PORT }))
 
       gridStore.assignCardToCell(cell.id, 'card-a', 'player1')
       expect(cell.card).toBe('card-a')
 
+      playerStore.currentPlayerId = 'player1'
       gridStore.assignCardToCell(cell.id, 'card-b', 'player1')
 
       expect(cell.card).toBe('card-a')
       expect(cardStore.getCardById('card-b')?.status).toBe(CardStatus.Deck)
+      expect(playerStore.currentPlayerId).toBe('player1')
     })
 
     function placeBridge(
@@ -156,23 +165,25 @@ describe('gridStore', () => {
     })
 
     it('does not place a card when the path leads through a rat port', () => {
-      const { gridStore, cardStore, cell } = setupCardAt(4, 2, LEFT_PORT)
+      const { gridStore, cardStore, cell, playerStore } = setupCardAt(4, 2, LEFT_PORT)
       placeBridge(gridStore, cardStore, { group: 1, isRat: true })
 
       gridStore.assignCardToCell(cell.id, 'my-card', 'player1')
 
       expect(cell.card).toBeUndefined()
       expect(cardStore.getCardById('my-card')?.status).toBe(CardStatus.Deck)
+      expect(playerStore.currentPlayerId).toBe('player1')
     })
 
     it("does not place a card when the path leads through another player's door", () => {
-      const { gridStore, cardStore, cell } = setupCardAt(4, 2, LEFT_PORT)
-      placeBridge(gridStore, cardStore, { group: 1, door: 1 }) // player1 играет цветом 2
+      const { gridStore, cardStore, cell, playerStore } = setupCardAt(4, 2, LEFT_PORT)
+      placeBridge(gridStore, cardStore, { group: 1, door: 1 })
 
       gridStore.assignCardToCell(cell.id, 'my-card', 'player1')
 
       expect(cell.card).toBeUndefined()
       expect(cardStore.getCardById('my-card')?.status).toBe(CardStatus.Deck)
+      expect(playerStore.currentPlayerId).toBe('player1')
     })
 
     it('places a card when the path leads through own door', () => {
@@ -199,6 +210,44 @@ describe('gridStore', () => {
 
       expect(cell.card).toBe('my-card')
       expect(playerStore.players.find(p => p.id === 'player1')?.gold).toBe(3)
+    })
+
+    it('counts gold for both players when the card connects both entrances', () => {
+      const gridStore = useGridStore()
+      const cardStore = useCardStore()
+      const playerStore = usePlayerStore()
+      cardStore.cards.set('my-card', makeCard({
+        id: 'my-card',
+        ports: [undefined, { group: 1 }, undefined, { group: 1 }],
+        gold: { 1: 3 },
+      }))
+      const cell = gridStore.grid.cells.find(c => c.coordinate.x === 2 && c.coordinate.y === 3)!
+
+      gridStore.assignCardToCell(cell.id, 'my-card', 'player1')
+
+      expect(cell.card).toBe('my-card')
+      expect(playerStore.players.find(p => p.id === 'player1')?.gold).toBe(3)
+      expect(playerStore.players.find(p => p.id === 'player2')?.gold).toBe(3)
+    })
+
+    it('counts gold behind a door only for the player of that color', () => {
+      const gridStore = useGridStore()
+      const cardStore = useCardStore()
+      const playerStore = usePlayerStore()
+      cardStore.cards.set('door-card', makeCard({
+        id: 'door-card',
+        ports: [undefined, { group: 1, door: 1 }, undefined, { group: 1 }],
+        gold: { 1: 5 },
+      }))
+      gridStore.grid.cells.find(c => c.coordinate.x === 2 && c.coordinate.y === 3)!.card = 'door-card'
+      cardStore.cards.set('my-card', makeCard({ id: 'my-card', ports: LEFT_PORT }))
+
+      const cell = gridStore.grid.cells.find(c => c.coordinate.x === 3 && c.coordinate.y === 2)!
+      gridStore.assignCardToCell(cell.id, 'my-card', 'player1')
+
+      expect(cell.card).toBe('my-card')
+      expect(playerStore.players.find(p => p.id === 'player1')?.gold).toBe(0)
+      expect(playerStore.players.find(p => p.id === 'player2')?.gold).toBe(5)
     })
   })
 })

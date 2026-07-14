@@ -4,6 +4,7 @@ export interface IPlayer {
   avatar: string
   gold: number
   entranceCardId: string
+  color: PlayerColor
 }
 
 export type PlayerColor = 1 | 2
