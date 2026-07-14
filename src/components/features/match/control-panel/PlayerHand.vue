@@ -1,19 +1,28 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import PlayerIcon from '@/components/features/match/control-panel/PlayerIcon.vue'
 import DiscardHudButton from '@/components/features/match/DiscardHudButton.vue'
 import diamondIconSrc from '@/assets/diamond-icon.svg'
 import { usePlayerStore } from '@/stores/playerStore'
+import { useCardStore } from '@/stores/cardStore'
+import CardHand from '@/components/cards/CardHand.vue'
 
 const props = defineProps<{
   playerId: string
 }>()
 
 const playerStore = usePlayerStore()
+const cardStore = useCardStore()
+
+const { currentPlayerId } = storeToRefs(playerStore)
+
 const player = computed(() =>
   playerStore.players.find(p => p.id === props.playerId)
 )
 const gold = computed(() => player.value?.gold ?? 0)
+
+const playerCards = computed(() => cardStore.handOf(currentPlayerId.value))
 </script>
 
 <template>
@@ -44,6 +53,11 @@ const gold = computed(() => player.value?.gold ?? 0)
 
     <div class="flex w-full flex-wrap items-center justify-between gap-4">
       <PlayerIcon :player-id="playerId" />
+      <CardHand
+        :player-cards="playerCards"
+        :player-id="currentPlayerId"
+        class="min-w-0 lg:flex-1"
+      />
       <DiscardHudButton
         class="max-w-1/6 shrink-0"
         label="Discard"

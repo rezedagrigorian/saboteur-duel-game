@@ -174,19 +174,21 @@ describe('cardStore', () => {
     })
   })
 
-  describe('getRandomCard', () => {
+  describe('drawCard', () => {
     it('assign a deck card to the player', () => {
       const store = useCardStore()
-      vi.spyOn(Math, 'random').mockReturnValue(0)
+      store.buildDeck()
+      const deckBefore = Array.from(store.cards.values()).filter(c => c.status === CardStatus.Deck).length
 
-      const firstDeckCard = Array.from(store.cards.values()).find(card => card.status === CardStatus.Deck)!
-      const expectedId = firstDeckCard.id
+      store.drawCard('player1')
 
-      store.getRandomCard('player1')
+      const hand = Array.from(store.cards.values()).filter(
+        c => c.status === CardStatus.Hand && c.owner === 'player1',
+      )
+      expect(hand).toHaveLength(1)
 
-      const picked = store.getCardById(expectedId)
-      expect(picked?.status).toBe(CardStatus.Hand)
-      expect(picked?.owner).toBe('player1')
+      const deckAfter = Array.from(store.cards.values()).filter(c => c.status === CardStatus.Deck).length
+      expect(deckAfter).toBe(deckBefore - 1)
     })
 
     it('does nothing when deck is empty', () => {
@@ -194,7 +196,7 @@ describe('cardStore', () => {
       store.cards.clear()
       store.cards.set('test-1', makeCard({ id: 'test-1', status: CardStatus.Hand, owner: 'someone' }))
 
-      store.getRandomCard('player1')
+      store.drawCard('player1')
 
       const card = store.getCardById('test-1')
       expect(card?.status).toBe(CardStatus.Hand)
