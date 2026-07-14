@@ -5,6 +5,7 @@ import type { ICardBase, ICard, ICardPort } from '@/types'
 import { CardStatus } from '@/types/card'
 import { LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID } from '@/game-core/constants'
 import { shuffle } from '@/utils/shuffle'
+import { HAND_SIZE } from '@/game-core/constants'
 import cardsJson from './cards.json'
 
 const ENTRANCE_CARD_IDS = new Set([LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID])
@@ -28,17 +29,39 @@ function buildInitialCards(): Map<string, ICard> {
 export const useCardStore = defineStore('cards', () => {
   const cards = ref<Map<string, ICard>>(buildInitialCards())
   const selectedCardId = ref<string | null>(null)
+  const deckOrder = ref<string[]>([])
 
   const cardIds = computed(() => Array.from(cards.value.keys()))
   const playableCardIds = computed(() => cardIds.value.filter(id => !ENTRANCE_CARD_IDS.has(id)))
 
-  function getRandomCard(playerId: string): void {
-    const deckCards = Array.from(cards.value.values()).filter(card => card.status === CardStatus.Deck)
-    if (deckCards.length === 0) return
-    const randomCard = deckCards[Math.floor(Math.random() * deckCards.length)]
-    if (!randomCard) return
-    randomCard.status = CardStatus.Hand
-    randomCard.owner = playerId
+  function buildDeck():void {
+    const deckIds = Array.from(cards.value.values())
+      .filter(card => card.status === CardStatus.Deck)
+      .map(card => card.id)
+    deckOrder.value = shuffle(deckIds)
+  }
+
+  function drawCard(playerId: string): void {
+    const nextId = deckOrder.value.shift()
+    if (!nextId) return
+    const card = cards.value.get(nextId)
+    if (!card) return
+    card.status = CardStatus.Hand
+    card.owner = playerId
+  }
+
+  function dealInitialHands(playerIds: string[], handSize = HAND_SIZE): void {
+    buildDeck()
+    playerIds.forEach(playerId => {
+      for (let i = 0; i < handSize; i++) {
+        drawCard(playerId)
+      }
+    })
+  }
+
+  function handOf(playerId: string): ICard[] {
+    return Array.from(cards.value.values())
+      .filter(card => card.owner === playerId && card.status === CardStatus.Hand)
   }
 
   function pickGoalCards(count: number): string[] {
@@ -118,7 +141,10 @@ export const useCardStore = defineStore('cards', () => {
     rotateSelectedCard,
     getPortsByCardID,
     getOutPortsByCardIDAndPortIndex,
-    getRandomCard,
     pickGoalCards,
+    buildDeck,
+    dealInitialHands,
+    drawCard,
+    handOf
   }
 })

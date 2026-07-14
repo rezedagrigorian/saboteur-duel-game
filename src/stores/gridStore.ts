@@ -83,11 +83,16 @@ export const useGridStore = defineStore('grid', () => {
   const cardStore = useCardStore()
   const playerStore = usePlayerStore()
 
-  placeGoalCards()
+  setupCards()
 
   function initializeGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT):void {
     grid.value = createGrid(width, height)
+    setupCards()
+  }
+
+  function setupCards(): void {
     placeGoalCards()
+    cardStore.dealInitialHands(playerStore.players.map(p => p.id))
   }
 
   function getCellById(cellId: string): IGridCell | undefined {
@@ -286,6 +291,7 @@ export const useGridStore = defineStore('grid', () => {
     cell.card = cardId
     cardStore.markCardAsPlaced(cardId, playerId)
     cardStore.clearSelection()
+    cardStore.drawCard(playerId)
 
     playerStore.players.forEach(( player => {
       goldTrace(player)
