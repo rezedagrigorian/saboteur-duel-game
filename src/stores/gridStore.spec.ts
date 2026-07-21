@@ -212,7 +212,7 @@ describe('gridStore', () => {
       expect(playerStore.players.find(p => p.id === 'player1')?.gold).toBe(3)
     })
 
-    it('counts gold for both players when the card connects both entrances', () => {
+    it('assigns gold only to the player who connects the tunnel, even when the card links both entrances', () => {
       const gridStore = useGridStore()
       const cardStore = useCardStore()
       const playerStore = usePlayerStore()
@@ -227,7 +227,8 @@ describe('gridStore', () => {
 
       expect(cell.card).toBe('my-card')
       expect(playerStore.players.find(p => p.id === 'player1')?.gold).toBe(3)
-      expect(playerStore.players.find(p => p.id === 'player2')?.gold).toBe(3)
+      expect(playerStore.players.find(p => p.id === 'player2')?.gold).toBe(0)
+      expect(cardStore.getCardById('my-card')?.goldOwners?.[1]).toBe('player1')
     })
 
     it('counts gold behind a door only for the player of that color', () => {

@@ -9,7 +9,7 @@ defineProps<{
 
 <template>
   <div class="inline-flex shrink-0 flex-col items-center overflow-visible">
-    <div class="relative w-[134px] rounded-full">
+    <div class="relative w-[120px] rounded-full">
       <img
         :src="iconCircleSrc"
         alt=""
