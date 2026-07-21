@@ -34,7 +34,6 @@ export enum CardAction {
   FixWagon = 'fix_wagon',
 }
 
-// card can have ports or card can have action, but not both at the same time
 export interface ICardBase {
   id: string
   ports: ICardPorts
@@ -42,6 +41,8 @@ export interface ICardBase {
 
   // gold is a mapping from group number to gold amount, if any
   gold?: Record<number, number>
+  // gold owners is a mapping from group number to player id 
+  goldOwners?: Record<number, string>
 
   isGolden: boolean
   style: ICardBaseStyle

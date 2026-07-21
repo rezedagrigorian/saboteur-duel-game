@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { storeToRefs } from 'pinia'
 import PlayerIcon from '@/components/features/match/control-panel/PlayerIcon.vue'
-import DiscardHudButton from '@/components/features/match/DiscardHudButton.vue'
-import diamondIconSrc from '@/assets/diamond-icon.svg'
+import DiamondCounter from '@/components/features/match/control-panel/DiamondCounter.vue'
+import PlayerActions from '@/components/features/match/control-panel/PlayerActions.vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useCardStore } from '@/stores/cardStore'
 import CardHand from '@/components/cards/CardHand.vue'
@@ -15,103 +14,82 @@ const props = defineProps<{
 const playerStore = usePlayerStore()
 const cardStore = useCardStore()
 
-const { currentPlayerId } = storeToRefs(playerStore)
-
 const player = computed(() =>
   playerStore.players.find(p => p.id === props.playerId)
 )
 const gold = computed(() => player.value?.gold ?? 0)
 
-const playerCards = computed(() => cardStore.handOf(currentPlayerId.value))
+const playerCards = computed(() => cardStore.handOf(props.playerId))
 </script>
 
 <template>
-  <div class="m-3 flex flex-col gap-4 border border-block-border bg-board-surface text-left pr-2">
-    <div class="flex flex-wrap items-center gap-4 justify-between sm:justify-start">
-      <div class="clip-btn flex shrink-0 items-center gap-2">
-        <span
-          class="size-2.5 shrink-0 rounded-full"
-          :class="player?.color === 2 ? 'bg-purple-400' : 'bg-yellow-400'"
-          aria-hidden="true"
-        />
-        {{ player?.name ?? 'You' }}
-      </div>
-      <div
-        class="flex shrink-0 items-center gap-1.5 text-base text-block-border"
-        aria-label="Gold"
+  <div class="m-3 w-[390px] shrink-0 flex flex-col gap-4 text-left pr-2">
+    <div class="clip-btn flex w-fit shrink-0 items-center gap-3 self-start">
+      <svg
+        class="clip-btn-shape"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
       >
-        <img
-          :src="diamondIconSrc"
-          alt="Gold"
-          class="size-5 shrink-0 select-none"
-          width="20"
-          height="18"
-        >
-        <span class="tabular-nums leading-none">{{ gold }}</span>
+        <polygon points="0,0 85,0 100,30 100,100 0,100" />
+      </svg>
+      <span
+        class="size-2.5 shrink-0 rounded-full"
+        :class="player?.color === 2 ? 'bg-purple-400' : 'bg-yellow-400'"
+        aria-hidden="true"
+      />
+      {{ player?.name ?? 'You' }}
+    </div>
+    <div class="flex items-start gap-4">
+      <PlayerIcon :player-id="playerId" />
+      <div class="flex min-w-0 flex-col gap-4">
+        <DiamondCounter
+          :gold="gold"
+        />
+        <PlayerActions :player-id="playerId" />
       </div>
     </div>
 
-    <div class="flex w-full flex-wrap items-center justify-between gap-4">
-      <PlayerIcon :player-id="playerId" />
-      <CardHand
-        :player-cards="playerCards"
-        :player-id="currentPlayerId"
-        class="min-w-0 lg:flex-1"
-      />
-      <DiscardHudButton
-        class="max-w-1/6 shrink-0"
-        label="Discard"
-      />
-    </div>
+    <div class="flex w-full flex-col items-center justify-between gap-4" />
+    <CardHand
+      :player-cards="playerCards"
+      :player-id="playerId"
+      class="min-w-0 lg:flex-1"
+    />
+    <!-- <DiscardHudButton
+      class="shrink-0"
+      label="Discard"
+    /> -->
   </div>
 </template>
 
 <style scoped>
   .clip-btn {
     position: relative;
-    padding: 6px 12px;
+    padding: 14px 28px 14px 20px;
     color: var(--color-block-border);
-    background: transparent;
-    border: none;
-    font-size: 12px;
-    letter-spacing: 0.04em;
+    font-family: "Kode Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
+    white-space: nowrap;
     cursor: default;
-    isolation: isolate;
-  }
- 
-  .clip-btn::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: var(--color-grid-cell-border);
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% calc(100% - 18px),
-      calc(100% - 18px) 100%,
-      0 100%
-    );
-    z-index: -2;
-  }
- 
-  .clip-btn::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: var(--color-block-border);
-    clip-path: polygon(
-      100% 0,
-      100% calc(100% - 18px),
-      calc(100% - 18px) 100%,
-      0 100%,
-      /* внутренний контур, отступ 2px */
-      1px calc(100% - 1px),
-      calc(100% - 18px - 0.5px) calc(100% - 1px),
-      calc(100% - 1px) calc(100% - 18px - 0.5px),
-      calc(100% - 1px) 0
-    );
-    z-index: -1;
   }
 
+  .clip-btn-shape {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .clip-btn-shape polygon {
+    fill: var(--color-grid-cell-border);
+    stroke: var(--color-block-border);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
 </style>

@@ -188,12 +188,22 @@ export const useGridStore = defineStore('grid', () => {
       if (inPort.isRat) continue
       if (inPort.door && inPort.door !== player.color) continue
 
-      if (neighbour.gold) {
-        const goldKey = `${neighbour.id}:${inPort.group}`
+      const goldAmount = neighbour.gold?.[inPort.group]
+      if (goldAmount !== undefined) {
+        const owner = neighbour.goldOwners?.[inPort.group]
 
-        if(!countedGold.has(goldKey)) {
-          total += neighbour.gold[inPort.group] ?? 0
-          countedGold.add(goldKey)
+        if (owner === undefined || owner === player.id) {
+          const goldKey = `${neighbour.id}:${inPort.group}`
+
+          if (!countedGold.has(goldKey)) {
+            total += goldAmount
+            countedGold.add(goldKey)
+
+            if (owner === undefined) {
+              if (!neighbour.goldOwners) neighbour.goldOwners = {}
+              neighbour.goldOwners[inPort.group] = player.id
+            }
+          }
         }
       }
 
@@ -293,9 +303,9 @@ export const useGridStore = defineStore('grid', () => {
     cardStore.clearSelection()
     cardStore.drawCard(playerId)
 
-    playerStore.players.forEach(( player => {
-      goldTrace(player)
-    }))
+    playerStore.players.filter(p => p.id === playerId).forEach(player => goldTrace(player))
+    playerStore.players.filter(p => p.id !== playerId).forEach(player => goldTrace(player))
+    
     playerStore.endTurn()
   }
 

@@ -12,7 +12,13 @@ const { currentPlayerId: playerId } = storeToRefs(usePlayerStore())
 </script>
 
 <template>
-  <div class="flex w-full flex-col gap-4">
+  <div class="flex w-full  gap-4">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-start">
+      <ShadowCard v-if="cardStore.selectedCardId" />
+      <div class="-mx-4 overflow-x-auto px-4 lg:mx-0 lg:overflow-visible lg:px-0">
+        <BoardGrid class="shrink-0" />
+      </div>
+    </div>
     <!-- <RouterLink
       :to="{ name: '/(lobby)' }"
       class="text-text-link"
@@ -20,11 +26,5 @@ const { currentPlayerId: playerId } = storeToRefs(usePlayerStore())
       ← Back to lobby
     </RouterLink> -->
     <PlayerHand :player-id="playerId" />
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-start">
-      <ShadowCard v-if="cardStore.selectedCardId" />
-      <div class="-mx-4 overflow-x-auto px-4 lg:mx-0 lg:overflow-visible lg:px-0">
-        <BoardGrid class="shrink-0" />
-      </div>
-    </div>
   </div>
 </template>

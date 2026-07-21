@@ -25,12 +25,12 @@ function handleCardClick(cardId: string) {
 
 <template>
   <aside
-    class="max-h-[500px] overflow-y-auto rounded-lg p-3 border border-border"
+    class="p-3"
     aria-label="Hand cards"
   >
     <div
       v-if="playerCards.length > 0"
-      class="flex flex-wrap gap-6"
+      class="grid grid-cols-3 gap-6"
     >
       <div
         v-for="card in playerCards"
