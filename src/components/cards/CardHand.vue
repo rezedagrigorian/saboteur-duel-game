@@ -30,7 +30,7 @@ function handleCardClick(cardId: string) {
   >
     <div
       v-if="playerCards.length > 0"
-      class="grid grid-cols-3 gap-6"
+      class="hand-grid mx-auto grid grid-cols-[repeat(3,minmax(var(--card-min-width),1fr))]"
     >
       <div
         v-for="card in playerCards"
@@ -40,7 +40,7 @@ function handleCardClick(cardId: string) {
         @click="handleCardClick(card.id)"
       >
         <div
-          class="card-size shrink-0 overflow-hidden bg-board-surface shadow-card-frame"
+          class="w-full aspect-[var(--card-aspect-ratio)] overflow-hidden bg-board-surface shadow-card-frame"
         >
           <Card :card-id="card.id" />
         </div>
@@ -56,3 +56,14 @@ function handleCardClick(cardId: string) {
     </div>
   </aside>
 </template>
+
+<style scoped>
+.hand-grid {
+  --hand-gap: 1.5rem;
+  --card-max-width: 110px;
+  --card-min-width: 70px;
+
+  gap: var(--hand-gap);
+  max-inline-size: calc(3 * var(--card-max-width) + 2 * var(--hand-gap));
+}
+</style>

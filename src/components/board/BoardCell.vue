@@ -36,7 +36,7 @@ function handleClick() {
 <template>
   <button
     type="button"
-    class="card-size min-w-0 overflow-hidden bg-main-bg card-border transition-colors"
+    class="h-full w-full min-h-0 min-w-0 overflow-hidden bg-main-bg card-border transition-colors"
     :class="[
       isPlaceable && 'hover:bg-cell-hover hover:ring-2 hover:ring-inset hover:ring-cyan-500',
       isLastColumn && 'card-border--no-right',

@@ -28,10 +28,10 @@ function portGroupClass(group: number): string {
 }
 
 const PORT_POSITIONS = [
-  'left-[-8px] top-1/2 -translate-y-1/2',      // 0 - слева по центру
-  'top-[-8px] left-1/2 -translate-x-1/2',      // 1 - сверху по центру
-  'right-[-8px] top-1/2 -translate-y-1/2',     // 2 - справа по центру
-  'bottom-[-8px] left-1/2 -translate-x-1/2',   // 3 - снизу по центру
+  'left-[-6%] top-1/2 -translate-y-1/2',      // 0 - слева по центру
+  'top-[-6%] left-1/2 -translate-x-1/2',      // 1 - сверху по центру
+  'right-[-6%] top-1/2 -translate-y-1/2',     // 2 - справа по центру
+  'bottom-[-6%] left-1/2 -translate-x-1/2',   // 3 - снизу по центру
 ]
 
 const RAT_OVERLAY_SIZE = 'w-[60%] aspect-[59/64]'
@@ -89,13 +89,13 @@ const ratOverlayClass = computed<string | null>(() => {
         <div
           v-for="(port, index) in card.ports"
           :key="card.id + '-' + index"
-          class="absolute flex size-5 items-center justify-center"
+          class="absolute flex aspect-square w-1/4 items-center justify-center"
           :class="PORT_POSITIONS[index]"
         >
           <div
             v-if="port"
             :key="`${card.id}-${index}-g${port.group}`"
-            class="flex size-5 flex-col items-center justify-center rounded-sm leading-none"
+            class="flex h-full w-full flex-col items-center justify-center rounded-sm leading-none"
             :class="portGroupClass(port.group)"
             :style="{
               border: port.isRat ? '1px dashed black' : 'none',

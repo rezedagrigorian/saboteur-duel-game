@@ -12,13 +12,12 @@ const { currentPlayerId: playerId } = storeToRefs(usePlayerStore())
 </script>
 
 <template>
-  <div class="flex w-full  gap-4">
-    <div class="flex flex-col gap-4 lg:flex-row lg:items-start">
-      <ShadowCard v-if="cardStore.selectedCardId" />
-      <div class="-mx-4 overflow-x-auto px-4 lg:mx-0 lg:overflow-visible lg:px-0">
-        <BoardGrid class="shrink-0" />
-      </div>
-    </div>
+  <div
+    class="grid min-h-0 w-full flex-1 grid-cols-1 gap-6
+           lg:grid-cols-[minmax(0,1fr)_clamp(20rem,28%,28rem)] lg:grid-rows-[minmax(0,1fr)]"
+  >
+    <ShadowCard v-if="cardStore.selectedCardId" />
+    <BoardGrid class="min-h-0" />
     <!-- <RouterLink
       :to="{ name: '/(lobby)' }"
       class="text-text-link"

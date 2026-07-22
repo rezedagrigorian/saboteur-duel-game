@@ -2,9 +2,11 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useCardStore } from '@/stores/cardStore'
+import { useGridStore } from '@/stores/gridStore'
 import Card from './Card.vue'
 
 const cardStore = useCardStore()
+const gridStore = useGridStore()
 const { selectedCardId } = storeToRefs(cardStore)
 
 const selectionX = ref(-1)
@@ -53,7 +55,8 @@ onUnmounted(() => {
     :style="{ left: `${selectionX}px`, top: `${selectionY}px` }"
   >
     <div
-      class="card-size overflow-hidden bg-board-surface shadow-card-frame"
+      class="overflow-hidden bg-board-surface shadow-card-frame"
+      :style="{ width: `${gridStore.boardCellSize}px`, aspectRatio: 'var(--card-aspect-ratio)' }"
     >
       <Card :card-id="selectedCardId!" />
     </div>

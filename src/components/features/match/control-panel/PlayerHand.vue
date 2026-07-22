@@ -23,7 +23,10 @@ const playerCards = computed(() => cardStore.handOf(props.playerId))
 </script>
 
 <template>
-  <div class="m-3 w-[390px] shrink-0 flex flex-col gap-4 text-left pr-2">
+  <div
+    class="flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-y-auto text-left
+           [scrollbar-gutter:stable] lg:max-h-full lg:self-start"
+  >
     <div class="clip-btn flex w-fit shrink-0 items-center gap-3 self-start">
       <svg
         class="clip-btn-shape"
