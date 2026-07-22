@@ -80,6 +80,7 @@ function createGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT): I
 
 export const useGridStore = defineStore('grid', () => {
   const grid = ref<IGrid>(createGrid())
+  const boardCellSize = ref(70)
   const cardStore = useCardStore()
   const playerStore = usePlayerStore()
 
@@ -309,5 +310,5 @@ export const useGridStore = defineStore('grid', () => {
     playerStore.endTurn()
   }
 
-  return { grid, initializeGrid, assignCardToCell }
+  return { grid, boardCellSize, initializeGrid, assignCardToCell }
 })

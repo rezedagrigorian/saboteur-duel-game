@@ -7,14 +7,9 @@
   --color-board-surface: #003550;
   --color-cell-hover: #0A4A60;
   --shadow-card-frame: 0 0 5px 2px #00EBEB;
-  --cell-width: 70px;
   --card-aspect-ratio: 80 / 124;
-
-}
-
-@utility card-size {
-  width: var(--cell-width);
-  aspect-ratio: var(--card-aspect-ratio);
+  --board-cell-min: 70px;
+  --board-cell-max: 150px;
 }
 
 @layer base {
@@ -41,10 +36,10 @@
 #app {
   box-sizing: border-box;
   display: flex;
-  min-height: 100svh;
+  height: 100svh;
   max-width: 100%;
   margin-inline: auto;
-  padding-inline: 1rem;
+  padding: 1rem;
   flex-direction: column;
   text-align: center;
 }
