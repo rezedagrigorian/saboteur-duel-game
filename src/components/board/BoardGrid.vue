@@ -54,8 +54,6 @@ onUnmounted(() => {
 <style scoped>
 .board-frame {
   container-type: inline-size;
-  display: grid;
-  place-items: safe center;
   inline-size: 100%;
   min-inline-size: 0;
   overflow: auto;
@@ -63,11 +61,7 @@ onUnmounted(() => {
 }
 
 .board-grid {
-  --cell: clamp(
-    var(--board-cell-min),
-    100cqi / var(--board-cols),
-    var(--board-cell-max)
-  );
+  --cell: max(var(--board-cell-min), 100cqi / var(--board-cols));
 
   grid-auto-rows: calc(var(--cell) * 124 / 80);
 }
@@ -80,13 +74,10 @@ onUnmounted(() => {
   }
 
   .board-grid {
-    --cell: clamp(
+    --cell: max(
       var(--board-cell-min),
-      min(
-        100cqi / var(--board-cols),
-        calc(100cqb / var(--board-rows) * 80 / 124)
-      ),
-      var(--board-cell-max)
+      100cqi / var(--board-cols),
+      100cqb / var(--board-rows) * 80 / 124
     );
   }
 }

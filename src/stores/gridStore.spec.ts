@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useGridStore } from './gridStore'
-import { GOAL_POSITIONS, LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID } from '@/game-core/constants'
+import { DEFAULT_GRID_HEIGHT, DEFAULT_GRID_WIDTH, GOAL_POSITIONS, LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID } from '@/game-core/constants'
 import { useCardStore } from './cardStore'
 import { usePlayerStore } from './playerStore'
 import makeCard from '@/test-utils/makeCard'
@@ -15,7 +15,7 @@ describe('gridStore', () => {
 
   it('creates a grid with default size', () => { 
     const store = useGridStore()
-    expect(store.grid.cells).toHaveLength(112)
+    expect(store.grid.cells).toHaveLength(DEFAULT_GRID_WIDTH * DEFAULT_GRID_HEIGHT)
   })
 
   it('places entrance cards at expected positions', () => {
