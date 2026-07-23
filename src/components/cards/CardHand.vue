@@ -25,12 +25,12 @@ function handleCardClick(cardId: string) {
 
 <template>
   <aside
-    class="p-3"
+    class="hand p-3"
     aria-label="Hand cards"
   >
     <div
       v-if="playerCards.length > 0"
-      class="hand-grid mx-auto grid grid-cols-[repeat(3,minmax(var(--card-min-width),1fr))]"
+      class="hand-grid grid"
     >
       <div
         v-for="card in playerCards"
@@ -58,12 +58,15 @@ function handleCardClick(cardId: string) {
 </template>
 
 <style scoped>
-.hand-grid {
-  --hand-gap: 1.5rem;
-  --card-max-width: 110px;
-  --card-min-width: 70px;
 
-  gap: var(--hand-gap);
-  max-inline-size: calc(3 * var(--card-max-width) + 2 * var(--hand-gap));
+.hand {
+  container-type: inline-size;
+}
+
+.hand-grid {
+  --card-width: clamp(46px, 19.4cqi, 78px);
+  grid-template-columns: repeat(3, var(--card-width));
+  justify-content: center;
+  gap: 3rem;
 }
 </style>

@@ -19,13 +19,25 @@ function centerScroll() {
   el.scrollTop = (el.scrollHeight - el.clientHeight) / 2
 }
 
+function measureCell() {
+  const cell = frame.value?.querySelector<HTMLElement>('.board-grid > *')
+  if (cell) { gridStore.boardCellSize = cell.getBoundingClientRect().width }
+}
+
+let observer: ResizeObserver | null = null
+
 onMounted(() => {
+  measureCell()
   centerScroll()
-  window.addEventListener('resize', centerScroll)
+  observer = new ResizeObserver(() => {
+    measureCell()
+    centerScroll()
+  })
+  if (frame.value) { observer.observe(frame.value) }
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', centerScroll)
+  observer?.disconnect()
 })
 </script>
 
