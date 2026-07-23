@@ -8,6 +8,7 @@ import { useGridStore } from '../../stores/gridStore'
 const gridStore = useGridStore()
 
 const cols = computed(() => gridStore.grid.size.width)
+const rows = computed(() => gridStore.grid.size.height)
 
 const frame = ref<HTMLElement | null>(null)
 
@@ -37,6 +38,7 @@ onUnmounted(() => {
       class="board-grid grid"
       :style="{
         '--board-cols': cols,
+        '--board-rows': rows,
         gridTemplateColumns: `repeat(${cols}, var(--cell))`,
       }"
     >
@@ -72,8 +74,20 @@ onUnmounted(() => {
 
 @media (width >= 64rem) {
   .board-frame {
+    container-type: size;
     block-size: 100%;
     min-block-size: 0;
+  }
+
+  .board-grid {
+    --cell: clamp(
+      var(--board-cell-min),
+      min(
+        100cqi / var(--board-cols),
+        calc(100cqb / var(--board-rows) * 80 / 124)
+      ),
+      var(--board-cell-max)
+    );
   }
 }
 </style>
