@@ -3,6 +3,8 @@ import { computed } from 'vue'
 import PlayerIcon from '@/components/features/match/control-panel/PlayerIcon.vue'
 import DiamondCounter from '@/components/features/match/control-panel/DiamondCounter.vue'
 import PlayerActions from '@/components/features/match/control-panel/PlayerActions.vue'
+import HandFrame from '@/components/features/match/control-panel/HandFrame.vue'
+import DiscardHudButton from '@/components/features/match/DiscardHudButton.vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useCardStore } from '@/stores/cardStore'
 import CardHand from '@/components/cards/CardHand.vue'
@@ -24,7 +26,7 @@ const playerCards = computed(() => cardStore.handOf(props.playerId))
 
 <template>
   <div
-    class="flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-y-auto text-left
+    class="flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-y-auto p-2.5 text-left
            [scrollbar-gutter:stable] lg:max-h-full lg:self-start"
   >
     <div class="clip-btn flex w-fit shrink-0 items-center gap-3 self-start">
@@ -53,16 +55,16 @@ const playerCards = computed(() => cardStore.handOf(props.playerId))
       </div>
     </div>
 
-    <div class="flex w-full flex-col items-center justify-between gap-4" />
-    <CardHand
-      :player-cards="playerCards"
-      :player-id="playerId"
-      class="min-w-0 lg:flex-1"
-    />
-    <!-- <DiscardHudButton
-      class="shrink-0"
-      label="Discard"
-    /> -->
+    <HandFrame class="min-w-0 lg:grow">
+      <CardHand
+        :player-cards="playerCards"
+        :player-id="playerId"
+        class="min-w-0"
+      />
+      <template #footer>
+        <DiscardHudButton label="Discard" />
+      </template>
+    </HandFrame>
   </div>
 </template>
 

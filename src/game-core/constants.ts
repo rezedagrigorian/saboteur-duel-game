@@ -1,6 +1,6 @@
-export const DEFAULT_GRID_WIDTH = 14
+export const DEFAULT_GRID_WIDTH = 16
 export const DEFAULT_GRID_HEIGHT = 8
-export const ENTRANCE_X_OFFSET = 12
+export const ENTRANCE_X_OFFSET = 14
 export const HAND_SIZE = 6
 
 export const GOAL_POSITIONS = [

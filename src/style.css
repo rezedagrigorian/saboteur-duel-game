@@ -9,7 +9,6 @@
   --shadow-card-frame: 0 0 5px 2px #00EBEB;
   --card-aspect-ratio: 80 / 124;
   --board-cell-min: 70px;
-  --board-cell-max: 150px;
 }
 
 @layer base {
