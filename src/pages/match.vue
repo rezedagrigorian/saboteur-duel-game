@@ -1,14 +1,10 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-
 import BoardGrid from '../components/board/BoardGrid.vue'
 import ShadowCard from '../components/cards/ShadowCard.vue'
-import PlayerHand from '../components/features/match/control-panel/PlayerHand.vue'
+import MatchControlPanel from '../components/features/match/control-panel/MatchControlPanel.vue'
 import { useCardStore } from '../stores/cardStore'
-import { usePlayerStore } from '../stores/playerStore'
 
 const cardStore = useCardStore()
-const { currentPlayerId: playerId } = storeToRefs(usePlayerStore())
 </script>
 
 <template>
@@ -24,6 +20,6 @@ const { currentPlayerId: playerId } = storeToRefs(usePlayerStore())
     >
       ← Back to lobby
     </RouterLink> -->
-    <PlayerHand :player-id="playerId" />
+    <MatchControlPanel />
   </div>
 </template>

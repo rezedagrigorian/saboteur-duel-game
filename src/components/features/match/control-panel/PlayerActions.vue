@@ -9,7 +9,7 @@ defineProps<{
     <div
       v-for="n in 3"
       :key="n"
-      class="relative size-16 shrink-0"
+      class="relative size-14 shrink-0"
     >
       <span
         class="corner corner-tl"

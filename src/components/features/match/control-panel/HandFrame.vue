@@ -34,11 +34,11 @@
   min-height: 0;
   flex-direction: column;
   flex-shrink: 0;
-  gap: 18px;
+  gap: 12px;
   inline-size: 100%;
   max-inline-size: 28rem;
   margin-inline: auto;
-  padding: 20px 18px;
+  padding: 14px 18px;
   border: 1px solid var(--color-grid-cell-border);
 }
 
