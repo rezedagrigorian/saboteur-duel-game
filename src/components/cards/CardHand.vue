@@ -67,6 +67,7 @@ function handleCardClick(cardId: string) {
   --card-width: clamp(46px, 19.4cqi, 78px);
   grid-template-columns: repeat(3, var(--card-width));
   justify-content: center;
-  gap: 3rem;
+  row-gap: 1rem;
+  column-gap: 3rem;
 }
 </style>

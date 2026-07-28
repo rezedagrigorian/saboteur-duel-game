@@ -12,13 +12,22 @@ function createInitialDuelPlayers(): IPlayer[] {
 
 export const usePlayerStore = defineStore('player', () => {
   const players = ref<IPlayer[]>(createInitialDuelPlayers())
+  const localPlayerId = ref<IPlayer['id']>('player1')
   const currentPlayerId = ref<IPlayer['id']>('player1')
+
+  const localPlayer = computed(() =>
+    players.value.find(player => player.id === localPlayerId.value)
+  )
+
+  const opponent = computed(() =>
+    players.value.find(player => player.id !== localPlayerId.value)
+  )
 
   const currentPlayer = computed(() =>
     players.value.find(player => player.id === currentPlayerId.value)
   )
 
-  const currentPlayerColor = computed(() => 
+  const currentPlayerColor = computed(() =>
     currentPlayer.value?.color ?? 1
   )
 
@@ -28,17 +37,20 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
   function endTurn() {
-    const nextPlayer = players.value.find(player => player.id !== currentPlayer.value?.id)
+    const nextPlayer = players.value.find(player => player.id !== currentPlayerId.value)
     if (!nextPlayer) return
     currentPlayerId.value = nextPlayer.id
   }
 
-  return { 
+  return {
     players,
+    localPlayerId,
     currentPlayerId,
+    localPlayer,
+    opponent,
     currentPlayer,
     currentPlayerColor,
     setGold,
-    endTurn
+    endTurn,
   }
 })

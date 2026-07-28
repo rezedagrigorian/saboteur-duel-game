@@ -69,4 +69,15 @@ describe('playerStore', () => {
     expect(store.currentPlayer?.id).toBe('player1')
     expect(store.currentPlayerColor).toBe(2)
   })
+
+  it('opponent stays fixed when the turn changes', () => {
+    const store = usePlayerStore()
+    expect(store.localPlayerId).toBe('player1')
+    expect(store.opponent?.id).toBe('player2')
+
+    store.endTurn()
+    expect(store.localPlayerId).toBe('player1')
+    expect(store.opponent?.id).toBe('player2')
+    expect(store.currentPlayer?.id).toBe('player2')
+  })
 })

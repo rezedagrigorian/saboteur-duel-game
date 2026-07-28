@@ -4,12 +4,11 @@ import diamondIconSrc from '@/assets/diamond-icon.svg'
 defineProps<{
   gold?: number
 }>()
-
 </script>
 
 <template>
   <div
-    class="w-24 shrink-0 select-none"
+    class="w-20 shrink-0 select-none"
     aria-label="Gold"
   >
     <svg
