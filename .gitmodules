@@ -1,3 +1,4 @@
 [submodule "public/cards"]
 	path = public/cards
 	url = git@github.com:rezedagrigorian/techno-moles-assets.git
+	branch = master
