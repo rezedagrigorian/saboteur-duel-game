@@ -6,6 +6,7 @@
   --color-block-border: #01CFCF;
   --color-board-surface: #003550;
   --color-cell-hover: #0A4A60;
+  --color-broken-frame: #FF683A;
   --shadow-card-frame: 0 0 5px 2px #00EBEB;
   --card-aspect-ratio: 80 / 124;
   --board-cell-min: 70px;

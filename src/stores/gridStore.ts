@@ -286,6 +286,7 @@ export const useGridStore = defineStore('grid', () => {
 
   function assignCardToCell(cellId: string, cardId: string, playerId: string) {
     if(playerId !== playerStore.currentPlayerId) return
+    if (playerStore.currentPlayer?.brokenTools.length) return
 
     const cell = getCellById(cellId)
     if(!cell) return

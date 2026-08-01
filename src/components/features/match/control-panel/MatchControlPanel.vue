@@ -10,6 +10,7 @@ import DiscardHudButton from '@/components/features/match/DiscardHudButton.vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useCardStore } from '@/stores/cardStore'
 import CardHand from '@/components/cards/CardHand.vue'
+import type { ToolKind } from '@/types/card'
 
 const playerStore = usePlayerStore()
 const cardStore = useCardStore()
@@ -23,6 +24,24 @@ const opponentCards = computed(() =>
 
 // dev toggle: show the opponent's hand to play both sides during development
 const SHOW_OPPONENT_HAND = true
+
+function onDiscard(playerId: string) {
+  if (playerId !== currentPlayerId.value) return
+
+  const discarded = cardStore.discardSelectedCard(playerId)
+  if (discarded) playerStore.endTurn()
+}
+
+// clicking a tool on your own panel plays a fix card, on the opponent's panel — a break card
+function onToolClick(panelOwnerId: string, tool: ToolKind) {
+  if (!cardStore.selectedCardId) return
+
+  const played = panelOwnerId === currentPlayerId.value
+    ? cardStore.playFixCard(currentPlayerId.value, cardStore.selectedCardId, tool)
+    : cardStore.playBreakCard(currentPlayerId.value, cardStore.selectedCardId, tool, panelOwnerId)
+  if (played) playerStore.endTurn()
+}
+
 </script>
 
 <template>
@@ -35,10 +54,16 @@ const SHOW_OPPONENT_HAND = true
       :color="localPlayer?.color"
     />
     <div class="flex items-start gap-4">
-      <PlayerIcon :player-id="localPlayerId" />
+      <PlayerIcon
+        :player-id="localPlayerId"
+        :avatar-src="localPlayer?.avatar"
+      />
       <div class="flex min-w-0 flex-col gap-3">
         <DiamondCounter :gold="localPlayer?.gold ?? 0" />
-        <PlayerActions :player-id="localPlayerId" />
+        <PlayerActions
+          :player-id="localPlayerId"
+          @tool-click="tool => onToolClick(localPlayerId, tool)"
+        />
       </div>
     </div>
 
@@ -50,7 +75,10 @@ const SHOW_OPPONENT_HAND = true
         :class="{ 'pointer-events-none opacity-50': currentPlayerId !== localPlayerId }"
       />
       <template #footer>
-        <DiscardHudButton label="Discard" />
+        <DiscardHudButton
+          label="Discard"
+          @click="onDiscard(localPlayerId)"
+        />
       </template>
     </HandFrame>
     <div
@@ -62,10 +90,16 @@ const SHOW_OPPONENT_HAND = true
         :color="opponent.color"
       />
       <div class="flex items-start gap-4">
-        <PlayerIcon :player-id="opponent.id" />
+        <PlayerIcon
+          :player-id="opponent.id"
+          :avatar-src="opponent.avatar"
+        />
         <div class="flex min-w-0 flex-col gap-3">
           <DiamondCounter :gold="opponent.gold" />
-          <PlayerActions :player-id="opponent.id" />
+          <PlayerActions
+            :player-id="opponent.id"
+            @tool-click="tool => onToolClick(opponent!.id, tool)"
+          />
         </div>
       </div>
       <HandFrame
@@ -79,7 +113,10 @@ const SHOW_OPPONENT_HAND = true
           :class="{ 'pointer-events-none opacity-50': currentPlayerId !== opponent.id }"
         />
         <template #footer>
-          <DiscardHudButton label="Discard" />
+          <DiscardHudButton
+            label="Discard"
+            @click="onDiscard(opponent.id)"
+          />
         </template>
       </HandFrame>
     </div>

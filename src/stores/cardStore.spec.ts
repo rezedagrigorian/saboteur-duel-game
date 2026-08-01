@@ -204,6 +204,39 @@ describe('cardStore', () => {
     })
   })
 
+  describe('discardSelectedCard', () => {
+    it('discards the selected card and draws a replacement', () => {
+      const store = useCardStore()
+      store.cards.clear()
+      store.cards.set('hand-1', makeCard({ id: 'hand-1', status: CardStatus.Hand, owner: 'player1' }))
+      store.cards.set('deck-1', makeCard({ id: 'deck-1', status: CardStatus.Deck }))
+      store.buildDeck()
+      store.selectCard('hand-1')
+
+      store.discardSelectedCard('player1')
+
+      expect(store.getCardById('hand-1')?.status).toBe(CardStatus.Discarded)
+      expect(store.getCardById('hand-1')?.owner).toBeNull()
+      expect(store.selectedCardId).toBeNull()
+      expect(store.getCardById('deck-1')?.status).toBe(CardStatus.Hand)
+      expect(store.getCardById('deck-1')?.owner).toBe('player1')
+      expect(store.handOf('player1')).toHaveLength(1)
+    })
+
+    it('does nothing when no card is selected', () => {
+      const store = useCardStore()
+      store.cards.clear()
+      store.cards.set('hand-1', makeCard({ id: 'hand-1', status: CardStatus.Hand, owner: 'player1' }))
+      store.cards.set('deck-1', makeCard({ id: 'deck-1', status: CardStatus.Deck }))
+      store.buildDeck()
+
+      store.discardSelectedCard('player1')
+
+      expect(store.getCardById('hand-1')?.status).toBe(CardStatus.Hand)
+      expect(store.getCardById('deck-1')?.status).toBe(CardStatus.Deck)
+    })
+  })
+
   describe('pickGoalCards', () => {
     function setupGoldenCards() {
       const store = useCardStore()

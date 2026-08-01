@@ -2,11 +2,12 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 import type { ICardBase, ICard, ICardPort } from '@/types'
-import { CardStatus } from '@/types/card'
+import { ActionEffect, CardStatus, ToolKind } from '@/types/card'
 import { LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID } from '@/game-core/constants'
 import { shuffle } from '@/utils/shuffle'
 import { HAND_SIZE } from '@/game-core/constants'
-import cardsJson from './cards.json'
+import { cards as cardBases } from './cards'
+import { usePlayerStore } from './playerStore'
 
 const ENTRANCE_CARD_IDS = new Set([LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID])
 
@@ -22,7 +23,7 @@ function createCard(base: ICardBase): ICard {
 
 function buildInitialCards(): Map<string, ICard> {
   return new Map(
-    (cardsJson as ICardBase[]).map(base => [base.id, createCard(base)])
+    cardBases.map(base => [base.id, createCard(base)])
   )
 }
 
@@ -30,6 +31,8 @@ export const useCardStore = defineStore('cards', () => {
   const cards = ref<Map<string, ICard>>(buildInitialCards())
   const selectedCardId = ref<string | null>(null)
   const deckOrder = ref<string[]>([])
+
+  const playerStore = usePlayerStore()
 
   const cardIds = computed(() => Array.from(cards.value.keys()))
   const playableCardIds = computed(() => cardIds.value.filter(id => !ENTRANCE_CARD_IDS.has(id)))
@@ -81,6 +84,27 @@ export const useCardStore = defineStore('cards', () => {
     selectedCardId.value = id
   }
 
+  function getHandCard(playerId: string, cardId: string): ICard | undefined {
+    const card = cards.value.get(cardId)
+    if (!card || card.owner !== playerId || card.status !== CardStatus.Hand) return undefined
+    return card
+  }
+
+  function consumeCard(card: ICard, playerId: string): void {
+    card.status = CardStatus.Discarded
+    card.owner = null
+    clearSelection()
+    drawCard(playerId)
+  }
+
+  function discardSelectedCard(playerId: string): boolean {
+    if (!selectedCardId.value) return false
+    const card = getHandCard(playerId, selectedCardId.value)
+    if (!card) return false
+    consumeCard(card, playerId)
+    return true
+  }
+
   function markCardAsPlaced(id: string, playerId: string) {
     if (!playerId.trim()) {
       return
@@ -129,6 +153,28 @@ export const useCardStore = defineStore('cards', () => {
     })
   }
 
+  function playBreakCard(playerId: string, cardId: string, tool: ToolKind, targetPlayerId: string): boolean {
+    const card = getHandCard(playerId, cardId)
+    const action = card?.actions.find(a => a.effect === ActionEffect.Break && a.tool === tool)
+    if (!card || !action) return false
+
+    if (!playerStore.applyAction(targetPlayerId, action)) return false
+
+    consumeCard(card, playerId)
+    return true
+  }
+
+  function playFixCard(playerId: string, cardId: string, tool: ToolKind): boolean {
+    const card = getHandCard(playerId, cardId)
+    const action = card?.actions.find(a => a.effect === ActionEffect.Fix && a.tool === tool)
+    if (!card || !action) return false
+
+    if (!playerStore.applyAction(playerId, action)) return false
+
+    consumeCard(card, playerId)
+    return true
+  }
+
   return {
     cards,
     cardIds,
@@ -136,6 +182,7 @@ export const useCardStore = defineStore('cards', () => {
     selectedCardId,
     getCardById,
     selectCard,
+    discardSelectedCard,
     markCardAsPlaced,
     clearSelection,
     rotateSelectedCard,
@@ -145,6 +192,8 @@ export const useCardStore = defineStore('cards', () => {
     buildDeck,
     dealInitialHands,
     drawCard,
-    handOf
+    handOf,
+    playBreakCard,
+    playFixCard,
   }
 })
