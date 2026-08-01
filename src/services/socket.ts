@@ -36,13 +36,14 @@ export function connect(id: string): void {
   if (socket) return
 
   status.value = SocketStatus.Connecting
-  socket = new WebSocket(WS_URL)
+  const ws = new WebSocket(WS_URL)
+  socket = ws
 
-  socket.addEventListener('open', () => {
-    socket?.send(JSON.stringify({ type: 'register', id }))
+  ws.addEventListener('open', () => {
+    ws.send(JSON.stringify({ type: 'register', id }))
   })
 
-  socket.addEventListener('message', event => {
+  ws.addEventListener('message', event => {
     const message = JSON.parse(event.data)
     if (message.type === 'registered') {
       status.value = SocketStatus.Connected
@@ -55,14 +56,19 @@ export function connect(id: string): void {
     }
   })
 
-  socket.addEventListener('close', () => {
+  ws.addEventListener('close', () => {
+    if (socket !== ws) return
     socket = null
     status.value = SocketStatus.Disconnected
   })
 }
 
 export function disconnect(): void {
-  socket?.close()
+  if (!socket) return
+  const ws = socket
+  socket = null
+  status.value = SocketStatus.Disconnected
+  ws.close()
 }
 
 export function send(data: unknown, to?: string): void {

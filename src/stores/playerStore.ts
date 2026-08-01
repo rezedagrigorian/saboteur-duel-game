@@ -4,24 +4,51 @@ import type { IPlayer } from '@/types'
 import { LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID, MAX_PLAYERS } from '@/game-core/constants'
 import { ActionEffect, type ICardAction } from '@/types/card'
 
+type RolePreset = Pick<IPlayer, 'name' | 'avatar' | 'entranceCardId' | 'color'>
+
+const LAVANDER_PRESET: RolePreset = {
+  name: 'Lavander',
+  avatar: '/cards/characters/icons/lavander-mole-icon.svg',
+  entranceCardId: LAVANDER_ENTRANCE_CARD_ID,
+  color: 2,
+}
+
+const YELLOW_PRESET: RolePreset = {
+  name: 'Yellow',
+  avatar: '/cards/characters/icons/yellow-mole-icon.svg',
+  entranceCardId: YELLOW_ENTRANCE_CARD_ID,
+  color: 1,
+}
+
 function generatePlayerId(): string {
   return `player-${crypto.randomUUID().slice(0, 8)}`
 }
 
-function createDefaultPlayer(): IPlayer {
-  return { id: generatePlayerId(), name: 'Player 1', avatar: '/cards/characters/icons/lavander-mole-icon.svg', gold: 0, entranceCardId: LAVANDER_ENTRANCE_CARD_ID, color: 2, brokenTools: [] }
-}
-
-function createOpponentPlayer(id: string): IPlayer {
-  return { id, name: 'Player 2', avatar: '/cards/characters/icons/yellow-mole-icon.svg', gold: 0, entranceCardId: YELLOW_ENTRANCE_CARD_ID, color: 1, brokenTools: [] }
+function createPlayer(id: string): IPlayer {
+  return { id, gold: 0, brokenTools: [], ...LAVANDER_PRESET }
 }
 
 export const usePlayerStore = defineStore('player', () => {
-  const players = ref<IPlayer[]>([createDefaultPlayer()])
+  const players = ref<IPlayer[]>([createPlayer(generatePlayerId())])
   const localPlayerId = ref<IPlayer['id']>(players.value[0].id)
   const currentPlayerId = ref<IPlayer['id']>(localPlayerId.value)
 
   const getPlayerById = (playerId: string) => players.value.find(player => player.id === playerId)
+
+  function assignRoles(): void {
+    if (players.value.length < MAX_PLAYERS) return
+    const [lavander, yellow] = [...players.value].sort((a, b) => a.id.localeCompare(b.id))
+    Object.assign(lavander, LAVANDER_PRESET)
+    Object.assign(yellow, YELLOW_PRESET)
+    currentPlayerId.value = lavander.id
+  }
+
+  function addPlayer(id: string): boolean {
+    if (players.value.length >= MAX_PLAYERS || getPlayerById(id)) return false
+    players.value.push(createPlayer(id))
+    assignRoles()
+    return true
+  }
 
   const localPlayer = computed(() => getPlayerById(localPlayerId.value))
 
@@ -55,12 +82,6 @@ export const usePlayerStore = defineStore('player', () => {
         targetPlayer.brokenTools = targetPlayer.brokenTools.filter(t => t !== action.tool)
         break
     }
-    return true
-  }
-
-  function addPlayer(id: string): boolean {
-    if (players.value.length >= MAX_PLAYERS || getPlayerById(id)) return false
-    players.value.push(createOpponentPlayer(id))
     return true
   }
 
