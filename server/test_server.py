@@ -133,6 +133,17 @@ async def test_id_freed_after_disconnect(url):
         assert await register(a2, "a") == {"type": "registered", "id": "a"}
 
 
+async def test_disconnect_notifies_others(url):
+    async with connect(url) as b, connect(url) as c:
+        await register(b, "b")
+        await register(c, "c")
+        async with connect(url) as a:
+            await register(a, "a")
+        expected = {"type": "disconnected", "id": "a"}
+        assert await recv_json(b) == expected
+        assert await recv_json(c) == expected
+
+
 async def test_debug_logging(url, caplog):
     with caplog.at_level(logging.DEBUG, logger="relay"):
         async with connect(url) as a, connect(url) as b:

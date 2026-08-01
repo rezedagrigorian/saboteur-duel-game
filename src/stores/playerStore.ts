@@ -1,26 +1,31 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { IPlayer } from '@/types'
-import { LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID } from '@/game-core/constants'
+import { LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID, MAX_PLAYERS } from '@/game-core/constants'
 import { ActionEffect, type ICardAction } from '@/types/card'
 
-function createInitialDuelPlayers(): IPlayer[] {
-  return [
-    { id: 'player1', name: 'Player 1', avatar: '/cards/characters/icons/lavander-mole-icon.svg', gold: 0, entranceCardId: LAVANDER_ENTRANCE_CARD_ID, color: 2, brokenTools: [] },
-    { id: 'player2', name: 'Player 2', avatar: '/cards/characters/icons/yellow-mole-icon.svg', gold: 0, entranceCardId: YELLOW_ENTRANCE_CARD_ID, color: 1, brokenTools: [] },
-  ]
+function generatePlayerId(): string {
+  return `player-${crypto.randomUUID().slice(0, 8)}`
+}
+
+function createDefaultPlayer(): IPlayer {
+  return { id: generatePlayerId(), name: 'Player 1', avatar: '/cards/characters/icons/lavander-mole-icon.svg', gold: 0, entranceCardId: LAVANDER_ENTRANCE_CARD_ID, color: 2, brokenTools: [] }
+}
+
+function createOpponentPlayer(id: string): IPlayer {
+  return { id, name: 'Player 2', avatar: '/cards/characters/icons/yellow-mole-icon.svg', gold: 0, entranceCardId: YELLOW_ENTRANCE_CARD_ID, color: 1, brokenTools: [] }
 }
 
 export const usePlayerStore = defineStore('player', () => {
-  const players = ref<IPlayer[]>(createInitialDuelPlayers())
-  const localPlayerId = ref<IPlayer['id']>('player1')
-  const currentPlayerId = ref<IPlayer['id']>('player1')
+  const players = ref<IPlayer[]>([createDefaultPlayer()])
+  const localPlayerId = ref<IPlayer['id']>(players.value[0].id)
+  const currentPlayerId = ref<IPlayer['id']>(localPlayerId.value)
 
   const getPlayerById = (playerId: string) => players.value.find(player => player.id === playerId)
 
   const localPlayer = computed(() => getPlayerById(localPlayerId.value))
 
-  const opponent = computed(() => getPlayerById(localPlayerId.value === 'player1' ? 'player2' : 'player1'))
+  const opponent = computed(() => players.value.find(player => player.id !== localPlayerId.value))
 
   const currentPlayer = computed(() => getPlayerById(currentPlayerId.value))
 
@@ -53,9 +58,20 @@ export const usePlayerStore = defineStore('player', () => {
     return true
   }
 
+  function addPlayer(id: string): boolean {
+    if (players.value.length >= MAX_PLAYERS || getPlayerById(id)) return false
+    players.value.push(createOpponentPlayer(id))
+    return true
+  }
+
+  function removePlayer(id: string): void {
+    if (id === localPlayerId.value || !getPlayerById(id)) return
+    players.value = players.value.filter(player => player.id !== id)
+    if (currentPlayerId.value === id) currentPlayerId.value = localPlayerId.value
+  }
+
   function endTurn() {
-    // todo string literals instead of hardcoded values
-    const nextPlayer = getPlayerById(currentPlayerId.value === 'player1' ? 'player2' : 'player1')
+    const nextPlayer = players.value.find(player => player.id !== currentPlayerId.value)
     if (!nextPlayer) return
     currentPlayerId.value = nextPlayer.id
   }
@@ -70,6 +86,8 @@ export const usePlayerStore = defineStore('player', () => {
     currentPlayerColor,
     setGold,
     applyAction,
+    addPlayer,
+    removePlayer,
     endTurn,
   }
 })

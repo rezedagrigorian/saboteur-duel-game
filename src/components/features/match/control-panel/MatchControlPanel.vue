@@ -18,12 +18,6 @@ const cardStore = useCardStore()
 const { localPlayerId, localPlayer, opponent, currentPlayerId } = storeToRefs(playerStore)
 
 const playerCards = computed(() => cardStore.handOf(localPlayerId.value))
-const opponentCards = computed(() =>
-  opponent.value ? cardStore.handOf(opponent.value.id) : []
-)
-
-// dev toggle: show the opponent's hand to play both sides during development
-const SHOW_OPPONENT_HAND = true
 
 function onDiscard(playerId: string) {
   if (playerId !== currentPlayerId.value) return
@@ -102,23 +96,6 @@ function onToolClick(panelOwnerId: string, tool: ToolKind) {
           />
         </div>
       </div>
-      <HandFrame
-        v-if="SHOW_OPPONENT_HAND"
-        class="min-w-0"
-      >
-        <CardHand
-          :player-cards="opponentCards"
-          :player-id="opponent.id"
-          class="min-w-0"
-          :class="{ 'pointer-events-none opacity-50': currentPlayerId !== opponent.id }"
-        />
-        <template #footer>
-          <DiscardHudButton
-            label="Discard"
-            @click="onDiscard(opponent.id)"
-          />
-        </template>
-      </HandFrame>
     </div>
   </div>
 </template>

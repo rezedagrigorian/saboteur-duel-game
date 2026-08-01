@@ -7,6 +7,7 @@ Protocol (every message is JSON, unknown fields are rejected):
 
 Recipients see: {"type": "message", "from": "player-1", "data": ...}
 Server errors:  {"type": "error", "error": "...", ...}
+On disconnect everyone else gets: {"type": "disconnected", "id": "player-1"}
 """
 
 import argparse
@@ -64,6 +65,7 @@ async def register(ws: ServerConnection) -> str | None:
 
     if message.id in clients:
         logger.debug("registration from %s rejected: id %r taken", ws.remote_address, message.id)
+        logger.info("total players: %d", len(clients))
         await send_json(ws, {"type": "error", "error": "id_taken", "id": message.id})
         return None
 
@@ -114,6 +116,8 @@ async def handler(ws: ServerConnection) -> None:
         if user_id is not None and clients.get(user_id) is ws:
             del clients[user_id]
             logger.debug("- %s disconnected (total: %d)", user_id, len(clients))
+            for other_ws in clients.values():
+                await send_json(other_ws, {"type": "disconnected", "id": user_id})
 
 
 async def run(host: str, port: int) -> None:
