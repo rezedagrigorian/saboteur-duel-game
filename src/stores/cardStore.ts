@@ -54,7 +54,6 @@ export const useCardStore = defineStore('cards', () => {
   }
 
   function dealInitialHands(playerIds: string[], handSize = HAND_SIZE): void {
-    buildDeck()
     playerIds.forEach(playerId => {
       for (let i = 0; i < handSize; i++) {
         drawCard(playerId)
@@ -67,13 +66,18 @@ export const useCardStore = defineStore('cards', () => {
       .filter(card => card.owner === playerId && card.status === CardStatus.Hand)
   }
 
+  function markCardsAsPlaced(ids: string[]): void {
+    ids.forEach(id => {
+      const card = cards.value.get(id)
+      if (card) card.status = CardStatus.Placed
+    })
+  }
+
   function pickGoalCards(count: number): string[] {
     const goldenCards = Array.from(cards.value.values()).filter(c => c.isGolden)
-    const picked = shuffle(goldenCards).slice(0, count)
-    picked.forEach(card => {
-      card.status = CardStatus.Placed
-    })
-    return picked.map(card => card.id)
+    const picked = shuffle(goldenCards).slice(0, count).map(card => card.id)
+    markCardsAsPlaced(picked)
+    return picked
   }
 
   function getCardById(id: string): ICard | undefined {
@@ -97,12 +101,16 @@ export const useCardStore = defineStore('cards', () => {
     drawCard(playerId)
   }
 
-  function discardSelectedCard(playerId: string): boolean {
-    if (!selectedCardId.value) return false
-    const card = getHandCard(playerId, selectedCardId.value)
+  function discardCard(playerId: string, cardId: string): boolean {
+    const card = getHandCard(playerId, cardId)
     if (!card) return false
     consumeCard(card, playerId)
     return true
+  }
+
+  function discardSelectedCard(playerId: string): boolean {
+    if (!selectedCardId.value) return false
+    return discardCard(playerId, selectedCardId.value)
   }
 
   function markCardAsPlaced(id: string, playerId: string) {
@@ -119,19 +127,20 @@ export const useCardStore = defineStore('cards', () => {
     selectedCardId.value = null
   }
 
-  function rotateSelectedCard() {
-    if (!selectedCardId.value) return
-    const card = cards.value.get(selectedCardId.value)
+  function rotateCardById(cardId: string) {
+    const card = cards.value.get(cardId)
     if (!card) return
-  
-    cards.value.set(selectedCardId.value, {
+    cards.value.set(cardId, {
       ...card,
       rotation: !card.rotation,
       ports: [card.ports[2], card.ports[3], card.ports[0], card.ports[1]],
     })
   }
-  
-  
+
+  function rotateSelectedCard() {
+    if (selectedCardId.value) rotateCardById(selectedCardId.value)
+  }
+
   function getPortsByCardID(id: string) : (ICardPort | undefined)[] {
     const card = getCardById(id)
     return card ? card.ports : []
@@ -182,10 +191,11 @@ export const useCardStore = defineStore('cards', () => {
     selectedCardId,
     getCardById,
     selectCard,
-    discardSelectedCard,
     markCardAsPlaced,
+    markCardsAsPlaced,
     clearSelection,
     rotateSelectedCard,
+    rotateCardById,
     getPortsByCardID,
     getOutPortsByCardIDAndPortIndex,
     pickGoalCards,
@@ -195,5 +205,8 @@ export const useCardStore = defineStore('cards', () => {
     handOf,
     playBreakCard,
     playFixCard,
+    deckOrder,
+    discardCard,
+    discardSelectedCard,
   }
 })

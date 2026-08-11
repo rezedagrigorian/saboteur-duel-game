@@ -35,9 +35,13 @@ export const usePlayerStore = defineStore('player', () => {
 
   const getPlayerById = (playerId: string) => players.value.find(player => player.id === playerId)
 
+  function getSortedPlayers(): IPlayer[] {
+    return [...players.value].sort((a, b) => a.id.localeCompare(b.id))
+  }
+
   function assignRoles(): void {
     if (players.value.length < MAX_PLAYERS) return
-    const [lavander, yellow] = [...players.value].sort((a, b) => a.id.localeCompare(b.id))
+    const [lavander, yellow] = getSortedPlayers()
     Object.assign(lavander, LAVANDER_PRESET)
     Object.assign(yellow, YELLOW_PRESET)
     currentPlayerId.value = lavander.id
@@ -51,6 +55,13 @@ export const usePlayerStore = defineStore('player', () => {
   }
 
   const localPlayer = computed(() => getPlayerById(localPlayerId.value))
+
+  const sortedPlayerIds = computed(() => getSortedPlayers().map(p => p.id))
+
+  const isHost = computed(() =>
+    players.value.length === MAX_PLAYERS &&
+    localPlayer.value?.entranceCardId === LAVANDER_ENTRANCE_CARD_ID
+  )
 
   const opponent = computed(() => players.value.find(player => player.id !== localPlayerId.value))
 
@@ -110,5 +121,7 @@ export const usePlayerStore = defineStore('player', () => {
     addPlayer,
     removePlayer,
     endTurn,
+    isHost,
+    sortedPlayerIds,
   }
 })
