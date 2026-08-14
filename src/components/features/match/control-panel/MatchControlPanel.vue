@@ -10,7 +10,7 @@ import DiscardHudButton from '@/components/features/match/DiscardHudButton.vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useCardStore } from '@/stores/cardStore'
 import CardHand from '@/components/cards/CardHand.vue'
-import type { ToolKind } from '@/types/card'
+import { ActionEffect, type ToolKind } from '@/types/card'
 
 const playerStore = usePlayerStore()
 const cardStore = useCardStore()
@@ -19,21 +19,22 @@ const { localPlayerId, localPlayer, opponent, currentPlayerId } = storeToRefs(pl
 
 const playerCards = computed(() => cardStore.handOf(localPlayerId.value))
 
+const isLocalTurn = computed(() => currentPlayerId.value === localPlayerId.value)
+
+const notMyTurnClass = computed(() => isLocalTurn.value ? '' : 'pointer-events-none opacity-50')
+
 function onDiscard(playerId: string) {
   if (playerId !== currentPlayerId.value) return
 
-  const discarded = cardStore.discardSelectedCard(playerId)
-  if (discarded) playerStore.endTurn()
+  cardStore.discardSelectedCard(playerId)
 }
 
 // clicking a tool on your own panel plays a fix card, on the opponent's panel — a break card
 function onToolClick(panelOwnerId: string, tool: ToolKind) {
   if (!cardStore.selectedCardId) return
 
-  const played = panelOwnerId === currentPlayerId.value
-    ? cardStore.playFixCard(currentPlayerId.value, cardStore.selectedCardId, tool)
-    : cardStore.playBreakCard(currentPlayerId.value, cardStore.selectedCardId, tool, panelOwnerId)
-  if (played) playerStore.endTurn()
+  const effect = panelOwnerId === localPlayerId.value ? ActionEffect.Fix : ActionEffect.Break
+  cardStore.playActionCard(localPlayerId.value, cardStore.selectedCardId, tool, effect, panelOwnerId)
 }
 
 </script>
@@ -56,6 +57,7 @@ function onToolClick(panelOwnerId: string, tool: ToolKind) {
         <DiamondCounter :gold="localPlayer?.gold ?? 0" />
         <PlayerActions
           :player-id="localPlayerId"
+          :class="notMyTurnClass"
           @tool-click="tool => onToolClick(localPlayerId, tool)"
         />
       </div>
@@ -66,7 +68,7 @@ function onToolClick(panelOwnerId: string, tool: ToolKind) {
         :player-cards="playerCards"
         :player-id="localPlayerId"
         class="min-w-0"
-        :class="{ 'pointer-events-none opacity-50': currentPlayerId !== localPlayerId }"
+        :class="notMyTurnClass"
       />
       <template #footer>
         <DiscardHudButton
@@ -92,6 +94,7 @@ function onToolClick(panelOwnerId: string, tool: ToolKind) {
           <DiamondCounter :gold="opponent.gold" />
           <PlayerActions
             :player-id="opponent.id"
+            :class="notMyTurnClass"
             @tool-click="tool => onToolClick(opponent!.id, tool)"
           />
         </div>

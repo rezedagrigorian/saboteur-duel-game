@@ -105,6 +105,7 @@ export const useCardStore = defineStore('cards', () => {
     const card = getHandCard(playerId, cardId)
     if (!card) return false
     consumeCard(card, playerId)
+    playerStore.endTurn()
     return true
   }
 
@@ -162,25 +163,25 @@ export const useCardStore = defineStore('cards', () => {
     })
   }
 
-  function playBreakCard(playerId: string, cardId: string, tool: ToolKind, targetPlayerId: string): boolean {
+  function playActionCard(
+    playerId: string,
+    cardId: string,
+    tool: ToolKind,
+    effect: ActionEffect,
+    targetPlayerId: string,
+  ): boolean {
+    if (playerId !== playerStore.currentPlayerId) return false
+
     const card = getHandCard(playerId, cardId)
-    const action = card?.actions.find(a => a.effect === ActionEffect.Break && a.tool === tool)
+    const action = card?.actions.find(a => a.effect === effect && a.tool === tool)
     if (!card || !action) return false
 
-    if (!playerStore.applyAction(targetPlayerId, action)) return false
+    // a fix always repairs its own player, only a break carries an explicit target
+    const target = effect === ActionEffect.Fix ? playerId : targetPlayerId
+    if (!playerStore.applyAction(target, action)) return false
 
     consumeCard(card, playerId)
-    return true
-  }
-
-  function playFixCard(playerId: string, cardId: string, tool: ToolKind): boolean {
-    const card = getHandCard(playerId, cardId)
-    const action = card?.actions.find(a => a.effect === ActionEffect.Fix && a.tool === tool)
-    if (!card || !action) return false
-
-    if (!playerStore.applyAction(playerId, action)) return false
-
-    consumeCard(card, playerId)
+    playerStore.endTurn()
     return true
   }
 
@@ -203,8 +204,7 @@ export const useCardStore = defineStore('cards', () => {
     dealInitialHands,
     drawCard,
     handOf,
-    playBreakCard,
-    playFixCard,
+    playActionCard,
     deckOrder,
     discardCard,
     discardSelectedCard,

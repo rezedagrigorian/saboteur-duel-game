@@ -3,19 +3,34 @@ import { useCardStore } from '@/stores/cardStore'
 import { usePlayerStore } from '@/stores/playerStore'
 import { useGridStore } from '@/stores/gridStore'
 import { connect, disconnect, onMessage, onPeerDisconnected, send, status, SocketStatus } from './socket'
+import { ActionEffect, ToolKind } from '@/types/card'
 
 let initialized = false
 let applyingRemoteAction = false
 let gameStarted = false
 
-type Msg = 
+type Msg =
   | { event: 'hello' }
   | { event: 'gameStart', deckOrder: string[], goalCardIds: string[] }
   | { event: 'placedCard', cardId: string, x: number, y: number, rotation: boolean }
   | { event: 'discardCard', cardId: string }
+  | { event: 'playAction', cardId: string, tool: ToolKind, effect: ActionEffect, targetPlayerId: string }
 
 function isMsg(data: unknown): data is Msg {
   return typeof data === 'object' && data !== null && typeof (data as { event?: unknown }).event === 'string'
+}
+
+function sendMsg(msg: Msg, to?: string): void {
+  send(msg, to)
+}
+
+function applyRemote(apply: () => boolean): boolean {
+  applyingRemoteAction = true
+  try {
+    return apply()
+  } finally {
+    applyingRemoteAction = false
+  }
 }
 
 export function initSync(playerId: string): void {
@@ -28,7 +43,7 @@ export function initSync(playerId: string): void {
   const cardStore = useCardStore()
 
   watch(status, value => {
-    if (value === SocketStatus.Connected) send({ event: 'hello' })
+    if (value === SocketStatus.Connected) sendMsg({ event: 'hello' })
   })
 
   onPeerDisconnected(id => playerStore.removePlayer(id))
@@ -39,11 +54,11 @@ export function initSync(playerId: string): void {
     switch (data.event) {
       case 'hello':
         if(!playerStore.addPlayer(from)) break
-        send({event: 'hello'}, from)
+        sendMsg({event: 'hello'}, from)
         if(playerStore.isHost && !gameStarted) {
           gameStarted = true
           const { deckOrder, goalCardIds } = gridStore.hostStartGame()
-          send({ event: 'gameStart', deckOrder, goalCardIds })
+          sendMsg({ event: 'gameStart', deckOrder, goalCardIds })
         }
         break
       case 'gameStart':
@@ -58,30 +73,25 @@ export function initSync(playerId: string): void {
         if(card && card.rotation !== data.rotation) {
           cardStore.rotateCardById(data.cardId)
         }
-        applyingRemoteAction = true
-        let ok: boolean
-        try {
-          ok = gridStore.assignCardToCell(cell.id, data.cardId, from)
-        } finally {
-          applyingRemoteAction = false
+        if (!applyRemote(() => gridStore.assignCardToCell(cell.id, data.cardId, from))) {
+          console.warn('[sync] placedCard rejected locally — desync?', data)
         }
-        if (!ok) console.warn('[sync] placedCard rejected locally — desync?', data)
-      }
         break
+      }
       case 'discardCard': {
         if(from !== playerStore.currentPlayerId) break
 
-        applyingRemoteAction = true
-        let ok: boolean
-        try {
-          ok = cardStore.discardCard(from, data.cardId)
-        } finally {
-          applyingRemoteAction = false
-        }
-        if(ok) {
-          playerStore.endTurn()
-        } else {
+        if (!applyRemote(() => cardStore.discardCard(from, data.cardId))) {
           console.warn('[sync] discardCard rejected locally — desync?', data)
+        }
+        break
+      }
+      case 'playAction': {
+        if (from !== playerStore.currentPlayerId) break
+
+        if (!applyRemote(() =>
+          cardStore.playActionCard(from, data.cardId, data.tool, data.effect, data.targetPlayerId))) {
+          console.warn('[sync] playAction rejected locally — desync?', data)
         }
         break
       }
@@ -98,16 +108,28 @@ export function initSync(playerId: string): void {
       const card = cardStore.getCardById(cardId)
       if (!card) return
       const { x, y } = cell.coordinate
-      send({ event: 'placedCard', x, y, cardId, rotation: card.rotation })
+      sendMsg({ event: 'placedCard', x, y, cardId, rotation: card.rotation })
     })
   })
-  cardStore.$onAction(({name, after}) => {
-    if(name !== 'discardSelectedCard') return
-    const cardId = cardStore.selectedCardId
-    after((success) => {
-      if (applyingRemoteAction || !success || !cardId) return
-      send({ event: 'discardCard', cardId })
-    })
+  cardStore.$onAction(({ name, args, after }) => {
+    switch (name) {
+      case 'discardSelectedCard': {
+        const cardId = cardStore.selectedCardId
+        after((success) => {
+          if (applyingRemoteAction || !success || !cardId) return
+          sendMsg({ event: 'discardCard', cardId })
+        })
+        break
+      }
+      case 'playActionCard': {
+        const [, cardId, tool, effect, targetPlayerId] = args
+        after((success) => {
+          if (applyingRemoteAction || !success) return
+          sendMsg({ event: 'playAction', cardId, tool, effect, targetPlayerId })
+        })
+        break
+      }
+    }
   })
 }
 
