@@ -1,39 +1,105 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { IPlayer } from '@/types'
-import { LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID } from '@/game-core/constants'
+import { LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID, MAX_PLAYERS } from '@/game-core/constants'
+import { ActionEffect, type ICardAction } from '@/types/card'
 
-function createInitialDuelPlayers(): IPlayer[] {
-  return [
-    { id: 'player1', name: 'Player 1', avatar: '', gold: 0, entranceCardId: LAVANDER_ENTRANCE_CARD_ID, color: 2 },
-    { id: 'player2', name: 'Player 2', avatar: '', gold: 0, entranceCardId: YELLOW_ENTRANCE_CARD_ID, color: 1 },
-  ]
+type RolePreset = Pick<IPlayer, 'name' | 'avatar' | 'entranceCardId' | 'color'>
+
+const LAVANDER_PRESET: RolePreset = {
+  name: 'Lavander',
+  avatar: '/cards/characters/icons/lavander-mole-icon.svg',
+  entranceCardId: LAVANDER_ENTRANCE_CARD_ID,
+  color: 2,
+}
+
+const YELLOW_PRESET: RolePreset = {
+  name: 'Yellow',
+  avatar: '/cards/characters/icons/yellow-mole-icon.svg',
+  entranceCardId: YELLOW_ENTRANCE_CARD_ID,
+  color: 1,
+}
+
+function generatePlayerId(): string {
+  return `player-${crypto.randomUUID().slice(0, 8)}`
+}
+
+function createPlayer(id: string): IPlayer {
+  return { id, gold: 0, brokenTools: [], ...LAVANDER_PRESET }
 }
 
 export const usePlayerStore = defineStore('player', () => {
-  const players = ref<IPlayer[]>(createInitialDuelPlayers())
-  const localPlayerId = ref<IPlayer['id']>('player1')
-  const currentPlayerId = ref<IPlayer['id']>('player1')
+  const players = ref<IPlayer[]>([createPlayer(generatePlayerId())])
+  const localPlayerId = ref<IPlayer['id']>(players.value[0].id)
+  const currentPlayerId = ref<IPlayer['id']>(localPlayerId.value)
 
-  const localPlayer = computed(() =>
-    players.value.find(player => player.id === localPlayerId.value)
+  const getPlayerById = (playerId: string) => players.value.find(player => player.id === playerId)
+
+  function getSortedPlayers(): IPlayer[] {
+    return [...players.value].sort((a, b) => a.id.localeCompare(b.id))
+  }
+
+  function assignRoles(): void {
+    if (players.value.length < MAX_PLAYERS) return
+    const [lavander, yellow] = getSortedPlayers()
+    Object.assign(lavander, LAVANDER_PRESET)
+    Object.assign(yellow, YELLOW_PRESET)
+    currentPlayerId.value = lavander.id
+  }
+
+  function addPlayer(id: string): boolean {
+    if (players.value.length >= MAX_PLAYERS || getPlayerById(id)) return false
+    players.value.push(createPlayer(id))
+    assignRoles()
+    return true
+  }
+
+  const localPlayer = computed(() => getPlayerById(localPlayerId.value))
+
+  const sortedPlayerIds = computed(() => getSortedPlayers().map(p => p.id))
+
+  const isHost = computed(() =>
+    players.value.length === MAX_PLAYERS &&
+    localPlayer.value?.entranceCardId === LAVANDER_ENTRANCE_CARD_ID
   )
 
-  const opponent = computed(() =>
-    players.value.find(player => player.id !== localPlayerId.value)
-  )
+  const opponent = computed(() => players.value.find(player => player.id !== localPlayerId.value))
 
-  const currentPlayer = computed(() =>
-    players.value.find(player => player.id === currentPlayerId.value)
-  )
+  const currentPlayer = computed(() => getPlayerById(currentPlayerId.value))
 
+  // todo: remove this
   const currentPlayerColor = computed(() =>
     currentPlayer.value?.color ?? 1
   )
 
   function setGold(playerId: string, amount: number) {
-    const player = players.value.find(p => p.id === playerId)
+    const player = getPlayerById(playerId)
     if (player) player.gold = amount
+  }
+
+  function applyAction(targetPlayerId: string, action: ICardAction): boolean {
+    const targetPlayer = getPlayerById(targetPlayerId)
+    if (!targetPlayer) return false
+
+    const isBroken = targetPlayer.brokenTools.includes(action.tool)
+
+    switch (action.effect) {
+      case ActionEffect.Break:
+        if (isBroken) return false
+        targetPlayer.brokenTools.push(action.tool)
+        break
+      case ActionEffect.Fix:
+        if (!isBroken) return false
+        targetPlayer.brokenTools = targetPlayer.brokenTools.filter(t => t !== action.tool)
+        break
+    }
+    return true
+  }
+
+  function removePlayer(id: string): void {
+    if (id === localPlayerId.value || !getPlayerById(id)) return
+    players.value = players.value.filter(player => player.id !== id)
+    if (currentPlayerId.value === id) currentPlayerId.value = localPlayerId.value
   }
 
   function endTurn() {
@@ -51,6 +117,11 @@ export const usePlayerStore = defineStore('player', () => {
     currentPlayer,
     currentPlayerColor,
     setGold,
+    applyAction,
+    addPlayer,
+    removePlayer,
     endTurn,
+    isHost,
+    sortedPlayerIds,
   }
 })

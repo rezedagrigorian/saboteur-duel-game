@@ -10,7 +10,7 @@ export default function makeCard(overrides: Partial<ICard> = {}): ICard {
       { group: 3 },
       { group: 4 },
     ],
-    action: null,
+    actions: [],
     isGolden: false,
     style: {},
     status: CardStatus.Deck,

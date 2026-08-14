@@ -84,16 +84,8 @@ export const useGridStore = defineStore('grid', () => {
   const cardStore = useCardStore()
   const playerStore = usePlayerStore()
 
-  setupCards()
-
   function initializeGrid(width = DEFAULT_GRID_WIDTH, height = DEFAULT_GRID_HEIGHT):void {
     grid.value = createGrid(width, height)
-    setupCards()
-  }
-
-  function setupCards(): void {
-    placeGoalCards()
-    cardStore.dealInitialHands(playerStore.players.map(p => p.id))
   }
 
   function getCellById(cellId: string): IGridCell | undefined {
@@ -104,14 +96,32 @@ export const useGridStore = defineStore('grid', () => {
     return grid.value.cells.find(c => c.coordinate.x === x && c.coordinate.y === y)
   }
 
-  function placeGoalCards(): void {
-    const goalCardIds = cardStore.pickGoalCards(GOAL_POSITIONS.length)
+  function placeGoalCards(goalCardIds: string []): void {
     goalCardIds.forEach((cardId, index) => {
       const pos = GOAL_POSITIONS[index]
       if (!pos) return
       const cell = getCell(pos.x, pos.y)
       if (cell) cell.card = cardId
     })
+    cardStore.markCardsAsPlaced(goalCardIds)
+  }
+
+  function startRound(goalCardIds: string[]): void {
+    placeGoalCards(goalCardIds)
+    cardStore.dealInitialHands(playerStore.sortedPlayerIds)
+  }
+
+  function hostStartGame(): {deckOrder: string [], goalCardIds: string []} {
+    const goalCardIds = cardStore.pickGoalCards(GOAL_POSITIONS.length)
+    cardStore.buildDeck()
+    const deckOrder = [...cardStore.deckOrder]
+    startRound(goalCardIds)
+    return { deckOrder, goalCardIds }
+  }
+
+  function applyStartGame(deckOrder: string[], goalCardIds: string[]): void {
+    cardStore.deckOrder = [...deckOrder]
+    startRound(goalCardIds)
   }
 
   function getNeighborCardByDirection(x: number, y: number, directionIndex: number) : ICard | undefined {
@@ -284,19 +294,20 @@ export const useGridStore = defineStore('grid', () => {
     return false
   }
 
-  function assignCardToCell(cellId: string, cardId: string, playerId: string) {
-    if(playerId !== playerStore.currentPlayerId) return
+  function assignCardToCell(cellId: string, cardId: string, playerId: string): boolean {
+    if(playerId !== playerStore.currentPlayerId) return false
+    if (playerStore.currentPlayer?.brokenTools.length) return false
 
     const cell = getCellById(cellId)
-    if(!cell) return
-    if (cell.card) return
+    if(!cell) return false
+    if (cell.card) return false
 
     if (!isCompatibleWithNeighbors(cardId, cell)) {
-      return
+      return false
     }
 
     if (!trace(cardId, cell)) {
-      return
+      return false
     }
 
     cell.card = cardId
@@ -304,11 +315,20 @@ export const useGridStore = defineStore('grid', () => {
     cardStore.clearSelection()
     cardStore.drawCard(playerId)
 
-    playerStore.players.filter(p => p.id === playerId).forEach(player => goldTrace(player))
-    playerStore.players.filter(p => p.id !== playerId).forEach(player => goldTrace(player))
-    
+    playerStore.players.forEach(player => goldTrace(player))
+
     playerStore.endTurn()
+    return true
   }
 
-  return { grid, boardCellSize, initializeGrid, assignCardToCell }
+  return {
+    grid,
+    boardCellSize,
+    initializeGrid,
+    assignCardToCell,
+    getCell,
+    hostStartGame,
+    applyStartGame,
+    getCellById,
+  }
 })

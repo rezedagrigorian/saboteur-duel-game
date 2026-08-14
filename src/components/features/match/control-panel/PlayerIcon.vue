@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import iconCircleSrc from '@/assets/icon-circle.svg'
-import moleIconSrc from '@/assets/lavander-icon.png'
 
 defineProps<{
   playerId?: string
+  avatarSrc?: string
 }>()
 </script>
 
@@ -19,7 +19,7 @@ defineProps<{
         class="absolute inset-0 z-20 bottom-[-20px] flex items-center justify-center pointer-events-none"
       >
         <img
-          :src="moleIconSrc"
+          :src="avatarSrc"
           alt=""
           class="pointer-events-none max-w-none w-[calc(100%-6px)]"
         >

@@ -2,11 +2,12 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 import type { ICardBase, ICard, ICardPort } from '@/types'
-import { CardStatus } from '@/types/card'
+import { ActionEffect, CardStatus, ToolKind } from '@/types/card'
 import { LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID } from '@/game-core/constants'
 import { shuffle } from '@/utils/shuffle'
 import { HAND_SIZE } from '@/game-core/constants'
-import cardsJson from './cards.json'
+import { cards as cardBases } from './cards'
+import { usePlayerStore } from './playerStore'
 
 const ENTRANCE_CARD_IDS = new Set([LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID])
 
@@ -22,7 +23,7 @@ function createCard(base: ICardBase): ICard {
 
 function buildInitialCards(): Map<string, ICard> {
   return new Map(
-    (cardsJson as ICardBase[]).map(base => [base.id, createCard(base)])
+    cardBases.map(base => [base.id, createCard(base)])
   )
 }
 
@@ -30,6 +31,8 @@ export const useCardStore = defineStore('cards', () => {
   const cards = ref<Map<string, ICard>>(buildInitialCards())
   const selectedCardId = ref<string | null>(null)
   const deckOrder = ref<string[]>([])
+
+  const playerStore = usePlayerStore()
 
   const cardIds = computed(() => Array.from(cards.value.keys()))
   const playableCardIds = computed(() => cardIds.value.filter(id => !ENTRANCE_CARD_IDS.has(id)))
@@ -51,7 +54,6 @@ export const useCardStore = defineStore('cards', () => {
   }
 
   function dealInitialHands(playerIds: string[], handSize = HAND_SIZE): void {
-    buildDeck()
     playerIds.forEach(playerId => {
       for (let i = 0; i < handSize; i++) {
         drawCard(playerId)
@@ -64,13 +66,18 @@ export const useCardStore = defineStore('cards', () => {
       .filter(card => card.owner === playerId && card.status === CardStatus.Hand)
   }
 
+  function markCardsAsPlaced(ids: string[]): void {
+    ids.forEach(id => {
+      const card = cards.value.get(id)
+      if (card) card.status = CardStatus.Placed
+    })
+  }
+
   function pickGoalCards(count: number): string[] {
     const goldenCards = Array.from(cards.value.values()).filter(c => c.isGolden)
-    const picked = shuffle(goldenCards).slice(0, count)
-    picked.forEach(card => {
-      card.status = CardStatus.Placed
-    })
-    return picked.map(card => card.id)
+    const picked = shuffle(goldenCards).slice(0, count).map(card => card.id)
+    markCardsAsPlaced(picked)
+    return picked
   }
 
   function getCardById(id: string): ICard | undefined {
@@ -79,6 +86,32 @@ export const useCardStore = defineStore('cards', () => {
 
   function selectCard(id: string) {
     selectedCardId.value = id
+  }
+
+  function getHandCard(playerId: string, cardId: string): ICard | undefined {
+    const card = cards.value.get(cardId)
+    if (!card || card.owner !== playerId || card.status !== CardStatus.Hand) return undefined
+    return card
+  }
+
+  function consumeCard(card: ICard, playerId: string): void {
+    card.status = CardStatus.Discarded
+    card.owner = null
+    clearSelection()
+    drawCard(playerId)
+  }
+
+  function discardCard(playerId: string, cardId: string): boolean {
+    const card = getHandCard(playerId, cardId)
+    if (!card) return false
+    consumeCard(card, playerId)
+    playerStore.endTurn()
+    return true
+  }
+
+  function discardSelectedCard(playerId: string): boolean {
+    if (!selectedCardId.value) return false
+    return discardCard(playerId, selectedCardId.value)
   }
 
   function markCardAsPlaced(id: string, playerId: string) {
@@ -95,19 +128,20 @@ export const useCardStore = defineStore('cards', () => {
     selectedCardId.value = null
   }
 
-  function rotateSelectedCard() {
-    if (!selectedCardId.value) return
-    const card = cards.value.get(selectedCardId.value)
+  function rotateCardById(cardId: string) {
+    const card = cards.value.get(cardId)
     if (!card) return
-  
-    cards.value.set(selectedCardId.value, {
+    cards.value.set(cardId, {
       ...card,
       rotation: !card.rotation,
       ports: [card.ports[2], card.ports[3], card.ports[0], card.ports[1]],
     })
   }
-  
-  
+
+  function rotateSelectedCard() {
+    if (selectedCardId.value) rotateCardById(selectedCardId.value)
+  }
+
   function getPortsByCardID(id: string) : (ICardPort | undefined)[] {
     const card = getCardById(id)
     return card ? card.ports : []
@@ -129,6 +163,28 @@ export const useCardStore = defineStore('cards', () => {
     })
   }
 
+  function playActionCard(
+    playerId: string,
+    cardId: string,
+    tool: ToolKind,
+    effect: ActionEffect,
+    targetPlayerId: string,
+  ): boolean {
+    if (playerId !== playerStore.currentPlayerId) return false
+
+    const card = getHandCard(playerId, cardId)
+    const action = card?.actions.find(a => a.effect === effect && a.tool === tool)
+    if (!card || !action) return false
+
+    // a fix always repairs its own player, only a break carries an explicit target
+    const target = effect === ActionEffect.Fix ? playerId : targetPlayerId
+    if (!playerStore.applyAction(target, action)) return false
+
+    consumeCard(card, playerId)
+    playerStore.endTurn()
+    return true
+  }
+
   return {
     cards,
     cardIds,
@@ -137,14 +193,20 @@ export const useCardStore = defineStore('cards', () => {
     getCardById,
     selectCard,
     markCardAsPlaced,
+    markCardsAsPlaced,
     clearSelection,
     rotateSelectedCard,
+    rotateCardById,
     getPortsByCardID,
     getOutPortsByCardIDAndPortIndex,
     pickGoalCards,
     buildDeck,
     dealInitialHands,
     drawCard,
-    handOf
+    handOf,
+    playActionCard,
+    deckOrder,
+    discardCard,
+    discardSelectedCard,
   }
 })
