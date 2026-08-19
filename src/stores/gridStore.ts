@@ -2,8 +2,9 @@ import { v4 as uuidv4 } from 'uuid'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-import type { ICard, IPlayer } from '@/types'
+import type { ICard, ICardPort, IPlayer } from '@/types'
 import type { IGrid, IGridCell } from '@/types'
+import type { PlayerColor } from '@/types/player'
 
 import { 
   DEFAULT_GRID_HEIGHT,
@@ -34,6 +35,13 @@ interface ITraceChunk {
 const PORT_MAPPING = [2, 3, 0, 1] as const
 
 // 0 -> 2, 1 -> 3, 2 -> 0, 3 -> 1
+
+// a rat blocks the passage for everyone, a door only for the opposite color
+function isPortPassable(port: ICardPort | undefined, color: PlayerColor): port is ICardPort {
+  if (!port) return false
+  if (port.isRat) return false
+  return !port.door || port.door === color
+}
 
 function createGridCells(width: number, height: number): IGridCell[] {
   const cells: IGridCell[] = []
@@ -111,7 +119,16 @@ export const useGridStore = defineStore('grid', () => {
     cardStore.dealInitialHands(playerStore.sortedPlayerIds)
   }
 
+  // keeps cell ids stable so the board patches instead of remounting every cell
+  function resetForNewRound(): void {
+    grid.value.cells.forEach(cell => { cell.card = undefined })
+    placeEntranceCards(grid.value)
+    cardStore.resetCards()
+    playerStore.resetRound()
+  }
+
   function hostStartGame(): {deckOrder: string [], goalCardIds: string []} {
+    resetForNewRound()
     const goalCardIds = cardStore.pickGoalCards(GOAL_POSITIONS.length)
     cardStore.buildDeck()
     const deckOrder = [...cardStore.deckOrder]
@@ -120,6 +137,7 @@ export const useGridStore = defineStore('grid', () => {
   }
 
   function applyStartGame(deckOrder: string[], goalCardIds: string[]): void {
+    resetForNewRound()
     cardStore.deckOrder = [...deckOrder]
     startRound(goalCardIds)
   }
@@ -168,7 +186,7 @@ export const useGridStore = defineStore('grid', () => {
     const startPorts = cardStore.getPortsByCardID(entranceCardId)
 
     for(const [index, port] of startPorts.entries()) {
-      if(port) {
+      if(isPortPassable(port, player.color)) {
         queue.push({
           portIndex: index,
           cardID: entranceCardId,
@@ -195,9 +213,7 @@ export const useGridStore = defineStore('grid', () => {
       }
 
       const inPort = neighbour.ports[PORT_MAPPING[portIndex]]
-      if (!inPort) continue
-      if (inPort.isRat) continue
-      if (inPort.door && inPort.door !== player.color) continue
+      if (!isPortPassable(inPort, player.color)) continue
 
       const goldAmount = neighbour.gold?.[inPort.group]
       if (goldAmount !== undefined) {
@@ -223,7 +239,7 @@ export const useGridStore = defineStore('grid', () => {
         continue
       }
       outPorts.forEach((outPort, index) => {
-        if (outPort) {
+        if (isPortPassable(outPort, player.color)) {
           queue.push({
             portIndex: index,
             cardID: neighbour.id,
@@ -245,7 +261,7 @@ export const useGridStore = defineStore('grid', () => {
 
     const startPorts = cardStore.getPortsByCardID(cardId)
     for (const [index, port] of startPorts.entries()) {
-      if (port) {
+      if (isPortPassable(port, playerStore.currentPlayerColor)) {
         queue.push({
           portIndex: index,
           cardID: cardId,
@@ -272,16 +288,14 @@ export const useGridStore = defineStore('grid', () => {
         continue
       }
       const inPort = neighbour.ports[PORT_MAPPING[portIndex]]
-      if (!inPort) continue
-      if (inPort.isRat) continue
-      if (inPort.door && inPort.door !== playerStore.currentPlayerColor) continue
+      if (!isPortPassable(inPort, playerStore.currentPlayerColor)) continue
 
       const outPorts = cardStore.getOutPortsByCardIDAndPortIndex(neighbour.id, PORT_MAPPING[portIndex])
       if (!outPorts) {
         continue
       }
       outPorts.forEach((outPort, index) => {
-        if (outPort) {
+        if (isPortPassable(outPort, playerStore.currentPlayerColor)) {
           queue.push({
             portIndex: index,
             cardID: neighbour.id,
@@ -315,7 +329,11 @@ export const useGridStore = defineStore('grid', () => {
     cardStore.clearSelection()
     cardStore.drawCard(playerId)
 
-    playerStore.players.forEach(player => goldTrace(player))
+    // the player who placed the card claims contested gold first, so both clients agree on the order
+    const placingPlayer = playerStore.currentPlayer
+    const others = playerStore.players.filter(player => player.id !== playerId)
+    if (placingPlayer) goldTrace(placingPlayer)
+    others.forEach(player => goldTrace(player))
 
     playerStore.endTurn()
     return true
