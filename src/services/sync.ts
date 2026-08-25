@@ -4,10 +4,12 @@ import { usePlayerStore } from '@/stores/playerStore'
 import { useGridStore } from '@/stores/gridStore'
 import { connect, disconnect, onMessage, onPeerDisconnected, send, status, SocketStatus } from './socket'
 import { ActionEffect, ToolKind } from '@/types/card'
+import { ROUND_RESTART_DELAY_MS } from '@/game-core/constants'
 
 let initialized = false
 let applyingRemoteAction = false
 let gameStarted = false
+let restartTimer: ReturnType<typeof setTimeout> | null = null
 
 type Msg =
   | { event: 'hello' }
@@ -22,6 +24,12 @@ function isMsg(data: unknown): data is Msg {
 
 function sendMsg(msg: Msg, to?: string): void {
   send(msg, to)
+}
+
+function cancelRestartTimer(): void {
+  if (restartTimer === null) return
+  clearTimeout(restartTimer)
+  restartTimer = null
 }
 
 function applyRemote(apply: () => boolean): boolean {
@@ -42,11 +50,28 @@ export function initSync(playerId: string): void {
   const playerStore = usePlayerStore()
   const cardStore = useCardStore()
 
+  // only the host generates the deck, so both clients share one card order
+  function startAndBroadcast(): void {
+    const { deckOrder, goalCardIds } = gridStore.hostStartGame()
+    sendMsg({ event: 'gameStart', deckOrder, goalCardIds })
+  }
+
   watch(status, value => {
     if (value === SocketStatus.Connected) sendMsg({ event: 'hello' })
   })
 
   onPeerDisconnected(id => playerStore.removePlayer(id))
+
+  // only the host restarts the round, once per transition into "round over"
+  watch(() => cardStore.isRoundOver, isOver => {
+    cancelRestartTimer()
+    if (!isOver || !playerStore.isHost) return
+    restartTimer = setTimeout(() => {
+      restartTimer = null
+      // the opponent may have left while the timer was running
+      if (playerStore.isHost) startAndBroadcast()
+    }, ROUND_RESTART_DELAY_MS)
+  })
 
   onMessage(({ from, data }) => {
     if (!isMsg(data)) return
@@ -57,13 +82,10 @@ export function initSync(playerId: string): void {
         sendMsg({event: 'hello'}, from)
         if(playerStore.isHost && !gameStarted) {
           gameStarted = true
-          const { deckOrder, goalCardIds } = gridStore.hostStartGame()
-          sendMsg({ event: 'gameStart', deckOrder, goalCardIds })
+          startAndBroadcast()
         }
         break
       case 'gameStart':
-        if(gameStarted) break
-        gameStarted = true
         gridStore.applyStartGame(data.deckOrder, data.goalCardIds)
         break
       case 'placedCard': {
@@ -134,5 +156,6 @@ export function initSync(playerId: string): void {
 }
 
 export function stopSync(): void {
+  cancelRestartTimer()
   disconnect()
 }

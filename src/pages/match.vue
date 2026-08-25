@@ -3,6 +3,7 @@ import { onMounted, onUnmounted } from 'vue'
 import BoardGrid from '../components/board/BoardGrid.vue'
 import ShadowCard from '../components/cards/ShadowCard.vue'
 import MatchControlPanel from '../components/features/match/control-panel/MatchControlPanel.vue'
+import RoundOverModal from '../components/features/match/RoundOverModal.vue'
 import { useCardStore } from '../stores/cardStore'
 import { usePlayerStore } from '../stores/playerStore'
 import { initSync, stopSync } from '../services/sync'
@@ -29,4 +30,5 @@ onUnmounted(stopSync)
     </RouterLink> -->
     <MatchControlPanel />
   </div>
+  <RoundOverModal v-if="cardStore.isRoundOver" />
 </template>

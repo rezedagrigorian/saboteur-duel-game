@@ -37,11 +37,25 @@ export const useCardStore = defineStore('cards', () => {
   const cardIds = computed(() => Array.from(cards.value.keys()))
   const playableCardIds = computed(() => cardIds.value.filter(id => !ENTRANCE_CARD_IDS.has(id)))
 
+  const isRoundOver = computed(() => {
+    for (const card of cards.value.values()) {
+      if (card.isGolden) continue
+      if (card.status === CardStatus.Deck || card.status === CardStatus.Hand) return false
+    }
+    return true
+  })
+
   function buildDeck():void {
     const deckIds = Array.from(cards.value.values())
-      .filter(card => card.status === CardStatus.Deck)
+      .filter(card => card.status === CardStatus.Deck && !card.isGolden)
       .map(card => card.id)
     deckOrder.value = shuffle(deckIds)
+  }
+
+  function resetCards() {
+    cards.value = buildInitialCards()
+    deckOrder.value = []
+    clearSelection()
   }
 
   function drawCard(playerId: string): void {
@@ -208,5 +222,7 @@ export const useCardStore = defineStore('cards', () => {
     deckOrder,
     discardCard,
     discardSelectedCard,
+    isRoundOver,
+    resetCards,
   }
 })

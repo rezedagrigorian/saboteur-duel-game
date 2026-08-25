@@ -72,6 +72,15 @@ export const usePlayerStore = defineStore('player', () => {
     currentPlayer.value?.color ?? 1
   )
 
+  const winner = computed(() => {
+    if (players.value.length < MAX_PLAYERS) return null
+
+    const [player1, player2] = players.value
+    if (player1.gold === player2.gold) return null
+
+    return player1.gold > player2.gold ? player1 : player2
+  })
+
   function setGold(playerId: string, amount: number) {
     const player = getPlayerById(playerId)
     if (player) player.gold = amount
@@ -108,6 +117,14 @@ export const usePlayerStore = defineStore('player', () => {
     currentPlayerId.value = nextPlayer.id
   }
 
+  function resetRound() {
+    players.value.forEach(player => {
+      player.gold = 0
+      player.brokenTools = []
+    })
+    assignRoles()
+  }
+
   return {
     players,
     localPlayerId,
@@ -123,5 +140,7 @@ export const usePlayerStore = defineStore('player', () => {
     endTurn,
     isHost,
     sortedPlayerIds,
+    winner,
+    resetRound,
   }
 })
