@@ -54,7 +54,7 @@ function onToolClick(panelOwnerId: string, tool: ToolKind) {
         :avatar-src="localPlayer?.avatar"
       />
       <div class="flex min-w-0 flex-col gap-3">
-        <DiamondCounter :gold="localPlayer?.gold ?? 0" />
+        <DiamondCounter :gold="localPlayer?.gold" />
         <PlayerActions
           :player-id="localPlayerId"
           :class="notMyTurnClass"

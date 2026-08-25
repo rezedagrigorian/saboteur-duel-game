@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import diamondIconSrc from '@/assets/diamond-icon.svg'
 
-defineProps<{
-  gold?: number
-}>()
+withDefaults(
+  defineProps<{
+    gold?: number
+    width?: string
+  }>(),
+  {
+    gold: 0,
+    width: '5rem',
+  },
+)
 </script>
 
 <template>
   <div
-    class="w-20 shrink-0 select-none"
+    class="shrink-0 select-none"
+    :style="{ width }"
     aria-label="Gold"
   >
     <svg
@@ -74,7 +82,7 @@ defineProps<{
         dominant-baseline="central"
         class="fill-block-border tabular-nums"
         font-size="44"
-      >{{ gold ?? 0 }}</text>
+      >{{ gold }}</text>
     </svg>
   </div>
 </template>

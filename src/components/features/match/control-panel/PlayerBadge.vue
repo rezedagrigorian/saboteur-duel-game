@@ -37,7 +37,7 @@ withDefaults(
   position: relative;
   padding: 11px 22px 11px 16px;
   color: var(--color-block-border);
-  font-family: "Kode Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  font-family: var(--font-hud);
   font-size: 14.4px;
   line-height: 1;
   font-weight: 700;
