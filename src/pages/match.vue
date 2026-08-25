@@ -30,5 +30,5 @@ onUnmounted(stopSync)
     </RouterLink> -->
     <MatchControlPanel />
   </div>
-  <RoundOverModal v-if="!cardStore.isRoundOver" />
+  <RoundOverModal v-if="cardStore.isRoundOver" />
 </template>
