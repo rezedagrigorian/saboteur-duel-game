@@ -110,8 +110,7 @@ function onClick(event: MouseEvent) {
   border-radius: 2px;
   background: linear-gradient(180deg, var(--surface-top) 0%, var(--surface-bottom) 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(1, 207, 207, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    var(--shadow-hud-bevel),
     inset 0 -4px 0.75rem rgba(0, 0, 0, 0.25);
   transition:
     background 140ms ease,
@@ -295,7 +294,7 @@ function onClick(event: MouseEvent) {
   width: 8px;
   height: 8px;
   border: 1.5px solid var(--cyan);
-  filter: drop-shadow(0 0 3px rgba(0, 235, 235, 0.65));
+  filter: drop-shadow(var(--drop-shadow-edge));
   z-index: 3;
 }
 
@@ -375,7 +374,7 @@ function onClick(event: MouseEvent) {
   height: 4px;
   border-radius: 50%;
   background: var(--cyan);
-  box-shadow: 0 0 3px var(--cyan);
+  box-shadow: var(--shadow-glow-mark);
   animation: none;
 }
 
@@ -426,7 +425,7 @@ function onClick(event: MouseEvent) {
   width: 12px;
   height: 2px;
   background: var(--cyan);
-  box-shadow: 0 0 4px var(--cyan);
+  box-shadow: var(--shadow-glow-mark);
   border-radius: 1px;
 }
 
@@ -481,7 +480,7 @@ function onClick(event: MouseEvent) {
     rgba(0, 235, 235, 0.28) 70%,
     transparent
   );
-  box-shadow: 0 0 8px rgba(0, 235, 235, 0.45);
+  box-shadow: var(--shadow-glow-accent);
   animation: none;
   transition: opacity 160ms ease;
 }

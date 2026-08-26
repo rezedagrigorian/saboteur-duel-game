@@ -4,6 +4,7 @@ export const ENTRANCE_X_OFFSET = 14
 export const HAND_SIZE = 6
 export const MAX_PLAYERS = 2
 export const ROUND_RESTART_DELAY_MS = 15_000
+export const ROUND_COUNT = 3
 
 export const GOAL_POSITIONS = [
   { x: 7, y: 3 }, { x: 7, y: 1 }, { x: 7, y: 5 },

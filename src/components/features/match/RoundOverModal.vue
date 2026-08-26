@@ -1,40 +1,54 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useCountdown } from '@vueuse/core'
 import HudModal from '@/components/ui/HudModal.vue'
-import PlayerBadge from '@/components/features/match/control-panel/PlayerBadge.vue'
-import DiamondCounter from '@/components/features/match/control-panel/DiamondCounter.vue'
+import MatchStandings from '@/components/features/match/MatchStandings.vue'
 import { usePlayerStore } from '@/stores/playerStore'
 import { ROUND_RESTART_DELAY_MS } from '@/game-core/constants'
 
+const router = useRouter()
 const playerStore = usePlayerStore()
-const { players, winner } = storeToRefs(playerStore)
+const { players, winner, roundWinner, gameOver, roundNumber } = storeToRefs(playerStore)
 
 const TOTAL_SECONDS = ROUND_RESTART_DELAY_MS / 1000
 
 const { remaining: secondsLeft, start } = useCountdown(TOTAL_SECONDS)
 
-start()
+if (!gameOver.value) start()
 
 const remainingRatio = computed(() => secondsLeft.value / TOTAL_SECONDS)
+
+const displayWinner = computed(() => (gameOver.value ? winner.value : roundWinner.value))
+
+const roundTitle = computed(() => (gameOver.value ? 'Game Over' : `Round ${roundNumber.value} Over`))
+
+const metaLabel = computed(() => (gameOver.value ? 'SYS://GAME_END' : 'SYS://ROUND_END'))
+
+function goToResults() {
+  router.push({ name: '/result' })
+}
 </script>
 
 <template>
   <HudModal
-    title="Round Over"
-    meta="SYS://ROUND_END"
+    :title="roundTitle"
+    :meta="metaLabel"
     size="lg"
     :closable="false"
   >
-    <p class="verdict">
-      <template v-if="winner">
+    <p
+      class="verdict"
+      :class="{ 'is-final': gameOver }"
+    >
+      <template v-if="displayWinner">
         <span
           class="verdict-dot"
-          :class="winner.color === 2 ? 'text-purple-400' : 'text-yellow-400'"
+          :class="displayWinner.color === 2 ? 'text-purple-400' : 'text-yellow-400'"
           aria-hidden="true"
         />
-        <span class="verdict-name">{{ winner.name }}</span>
+        <span class="verdict-name">{{ displayWinner.name }}</span>
         <span class="verdict-word">wins</span>
       </template>
       <span
@@ -43,34 +57,33 @@ const remainingRatio = computed(() => secondsLeft.value / TOTAL_SECONDS)
       >Draw</span>
     </p>
 
-    <ul class="scores">
-      <li
-        v-for="player in players"
-        :key="player.id"
-        class="score"
-        :class="{ 'is-winner': player.id === winner?.id }"
-      >
-        <PlayerBadge
-          :name="player.name"
-          :color="player.color"
-        />
-        <DiamondCounter
-          :gold="player.gold"
-          width="7rem"
-        />
-      </li>
-    </ul>
+    <MatchStandings
+      :players="players"
+      :winner-id="displayWinner?.id"
+      :total="gameOver"
+    />
 
     <template #footer>
-      <p class="countdown-label">
-        New round in <span class="countdown-value">{{ secondsLeft }}</span>s
-      </p>
-      <span class="countdown-track">
-        <span
-          class="countdown-bar"
-          :style="{ transform: `scaleX(${remainingRatio})` }"
-        />
-      </span>
+      <template v-if="gameOver">
+        <button
+          type="button"
+          class="results-btn"
+          @click="goToResults"
+        >
+          View Results
+        </button>
+      </template>
+      <template v-else>
+        <p class="countdown-label">
+          New round in <span class="countdown-value">{{ secondsLeft }}</span>s
+        </p>
+        <span class="countdown-track">
+          <span
+            class="countdown-bar"
+            :style="{ transform: `scaleX(${remainingRatio})` }"
+          />
+        </span>
+      </template>
     </template>
   </HudModal>
 </template>
@@ -113,30 +126,13 @@ const remainingRatio = computed(() => secondsLeft.value / TOTAL_SECONDS)
   letter-spacing: 0.2em;
 }
 
-.scores {
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.verdict.is-final {
+  font-size: 1.5rem;
 }
 
-.score {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  padding: 0.625rem 1.25rem 0.625rem 0;
-  border: 1px solid transparent;
-  background: rgba(0, 0, 0, 0.14);
-}
-
-.score.is-winner {
-  border-color: rgba(1, 207, 207, 0.45);
-  background: var(--color-grid-cell-border);
-  box-shadow: 0 0 0.75rem rgba(0, 235, 235, 0.12);
+.verdict.is-final .verdict-dot {
+  width: 12px;
+  height: 12px;
 }
 
 .countdown-label {
@@ -165,7 +161,7 @@ const remainingRatio = computed(() => secondsLeft.value / TOTAL_SECONDS)
   display: block;
   height: 100%;
   background: linear-gradient(90deg, rgba(1, 207, 207, 0.5), var(--color-block-border));
-  box-shadow: 0 0 8px rgba(0, 235, 235, 0.55);
+  box-shadow: var(--shadow-glow-accent);
   transform-origin: left center;
   transition: transform 1s linear;
 }
@@ -174,5 +170,33 @@ const remainingRatio = computed(() => secondsLeft.value / TOTAL_SECONDS)
   .countdown-bar {
     transition: none;
   }
+}
+
+.results-btn {
+  padding: 0.625rem 1.75rem;
+  border: 1px solid rgba(1, 207, 207, 0.45);
+  background: var(--color-grid-cell-border);
+  color: var(--color-block-border);
+  font-family: var(--font-hud);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.results-btn:hover,
+.results-btn:focus-visible {
+  border-color: var(--color-block-border);
+  background: var(--color-cell-hover);
+  box-shadow: var(--shadow-glow-focus);
+}
+
+.results-btn:focus-visible {
+  outline: 2px solid rgba(1, 207, 207, 0.75);
+  outline-offset: 2px;
 }
 </style>

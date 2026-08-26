@@ -62,14 +62,15 @@ export function initSync(playerId: string): void {
 
   onPeerDisconnected(id => playerStore.removePlayer(id))
 
-  // only the host restarts the round, once per transition into "round over"
+  // both clients bank the round's gold; only the host restarts, once per transition into "round over"
   watch(() => cardStore.isRoundOver, isOver => {
     cancelRestartTimer()
-    if (!isOver || !playerStore.isHost) return
+    if (!isOver) return
+    playerStore.finishRound()
+    if (!playerStore.isHost) return
     restartTimer = setTimeout(() => {
       restartTimer = null
-      // the opponent may have left while the timer was running
-      if (playerStore.isHost) startAndBroadcast()
+      if (playerStore.isHost && !playerStore.gameOver) startAndBroadcast()
     }, ROUND_RESTART_DELAY_MS)
   })
 
@@ -157,5 +158,6 @@ export function initSync(playerId: string): void {
 
 export function stopSync(): void {
   cancelRestartTimer()
+  gameStarted = false
   disconnect()
 }

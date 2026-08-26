@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { IPlayer } from '@/types'
-import { LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID, MAX_PLAYERS } from '@/game-core/constants'
+import { LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID, MAX_PLAYERS, ROUND_COUNT } from '@/game-core/constants'
 import { ActionEffect, type ICardAction } from '@/types/card'
 
 type RolePreset = Pick<IPlayer, 'name' | 'avatar' | 'entranceCardId' | 'color'>
@@ -25,13 +25,16 @@ function generatePlayerId(): string {
 }
 
 function createPlayer(id: string): IPlayer {
-  return { id, gold: 0, brokenTools: [], ...LAVANDER_PRESET }
+  return { id, gold: 0, brokenTools: [], totalGold: 0, ...LAVANDER_PRESET }
 }
 
 export const usePlayerStore = defineStore('player', () => {
   const players = ref<IPlayer[]>([createPlayer(generatePlayerId())])
   const localPlayerId = ref<IPlayer['id']>(players.value[0].id)
   const currentPlayerId = ref<IPlayer['id']>(localPlayerId.value)
+  // 0 until the first round starts; always the round currently in progress
+  const roundNumber = ref(0)
+  const gameOver = ref(false)
 
   const getPlayerById = (playerId: string) => players.value.find(player => player.id === playerId)
 
@@ -72,14 +75,19 @@ export const usePlayerStore = defineStore('player', () => {
     currentPlayer.value?.color ?? 1
   )
 
-  const winner = computed(() => {
-    if (players.value.length < MAX_PLAYERS) return null
+  function leaderBy(field: 'gold' | 'totalGold') {
+    return computed(() => {
+      if (players.value.length < MAX_PLAYERS) return null
 
-    const [player1, player2] = players.value
-    if (player1.gold === player2.gold) return null
+      const [player1, player2] = players.value
+      if (player1[field] === player2[field]) return null
 
-    return player1.gold > player2.gold ? player1 : player2
-  })
+      return player1[field] > player2[field] ? player1 : player2
+    })
+  }
+
+  const winner = leaderBy('totalGold')
+  const roundWinner = leaderBy('gold')
 
   function setGold(playerId: string, amount: number) {
     const player = getPlayerById(playerId)
@@ -117,9 +125,27 @@ export const usePlayerStore = defineStore('player', () => {
     currentPlayerId.value = nextPlayer.id
   }
 
-  function resetRound() {
+  function finishRound() {
+    players.value.forEach(player => {
+      player.totalGold += player.gold
+    })
+    if (roundNumber.value === ROUND_COUNT) gameOver.value = true
+  }
+
+  function resetRoundState() {
+    roundNumber.value++
     players.value.forEach(player => {
       player.gold = 0
+      player.brokenTools = []
+    })
+    assignRoles()
+  }
+
+  function resetGame() {
+    roundNumber.value = 0
+    gameOver.value = false
+    players.value.forEach(player => {
+      player.totalGold = 0
       player.brokenTools = []
     })
     assignRoles()
@@ -141,6 +167,11 @@ export const usePlayerStore = defineStore('player', () => {
     isHost,
     sortedPlayerIds,
     winner,
-    resetRound,
+    roundWinner,
+    resetGame,
+    finishRound,
+    roundNumber,
+    gameOver,
+    resetRoundState
   }
 })

@@ -8,6 +8,7 @@ export interface IPlayer {
   entranceCardId: string
   color: PlayerColor
   brokenTools: ToolKind[]
+  totalGold: number
 }
 
 export type PlayerColor = 1 | 2

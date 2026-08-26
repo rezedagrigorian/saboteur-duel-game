@@ -124,7 +124,7 @@ export const useGridStore = defineStore('grid', () => {
     grid.value.cells.forEach(cell => { cell.card = undefined })
     placeEntranceCards(grid.value)
     cardStore.resetCards()
-    playerStore.resetRound()
+    playerStore.resetRoundState()
   }
 
   function hostStartGame(): {deckOrder: string [], goalCardIds: string []} {
