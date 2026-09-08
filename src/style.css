@@ -10,7 +10,23 @@
   --color-hud-text: #F0FFFF;
   --color-hud-text-soft: rgba(232, 255, 255, .72);
   --font-hud: "Kode Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Glow tiers. One hue throughout (#00EBEB, a touch brighter than the
+     --color-block-border lines it sits on); radius and alpha grow with prominence. */
+  --shadow-glow-mark: 0 0 3px var(--color-block-border);
+  --shadow-glow-accent: 0 0 8px rgba(0, 235, 235, 0.5);
+  --shadow-glow-focus: 0 0 0.75rem rgba(0, 235, 235, 0.32);
+  --shadow-glow-hint: 0 0 0.75rem rgba(0, 235, 235, 0.12);
+  --shadow-glow-ambient: 0 0 3rem rgba(0, 235, 235, 0.16);
   --shadow-card-frame: 0 0 5px 2px #00EBEB;
+  /* Raised HUD surface: hairline cyan ring plus a top light catch. */
+  --shadow-hud-bevel:
+    inset 0 0 0 1px rgba(1, 207, 207, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  /* Same glow for shapes that need filter instead of box-shadow (masked SVG, clipped corners). */
+  --drop-shadow-edge: 0 0 3px rgba(0, 235, 235, 0.65);
+  --drop-shadow-edge-broken: 0 0 3px color-mix(in srgb, var(--color-broken-frame) 60%, transparent);
+
   --card-aspect-ratio: 80 / 124;
   --board-cell-min: 70px;
 }

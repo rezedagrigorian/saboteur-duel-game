@@ -89,13 +89,13 @@ function iconSrc(tool: ToolKind): string {
     width: 30%;
     height: 30%;
     border: 0 solid var(--color-block-border);
-    filter: drop-shadow(0 0 3px rgb(0 235 235 / 0.6));
+    filter: drop-shadow(var(--drop-shadow-edge));
     pointer-events: none;
   }
 
   .is-broken .corner {
     border-color: var(--color-broken-frame);
-    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--color-broken-frame) 60%, transparent));
+    filter: drop-shadow(var(--drop-shadow-edge-broken));
   }
 
   .broken-fill {

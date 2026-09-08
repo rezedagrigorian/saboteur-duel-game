@@ -60,7 +60,7 @@
   width: 12px;
   height: 12px;
   border: 1.5px solid var(--color-block-border);
-  filter: drop-shadow(0 0 3px rgba(0, 235, 235, 0.65));
+  filter: drop-shadow(var(--drop-shadow-edge));
   pointer-events: none;
 }
 

@@ -133,10 +133,7 @@ onKeyStroke('Escape', close)
   gap: 1.5rem;
   padding: 3rem 3rem 2.25rem;
   background: linear-gradient(180deg, var(--color-cell-hover) 0%, var(--color-board-surface) 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(1, 207, 207, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 0 3rem rgba(0, 235, 235, 0.16);
+  box-shadow: var(--shadow-hud-bevel), var(--shadow-glow-ambient);
   isolation: isolate;
   overflow: hidden;
   animation: panel-in 260ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
@@ -160,7 +157,7 @@ onKeyStroke('Escape', close)
   width: 18px;
   height: 18px;
   border: 0 solid var(--color-block-border);
-  filter: drop-shadow(0 0 3px rgba(0, 235, 235, 0.65));
+  filter: drop-shadow(var(--drop-shadow-edge));
   pointer-events: none;
 }
 
@@ -210,7 +207,7 @@ onKeyStroke('Escape', close)
   height: 4px;
   border-radius: 50%;
   background: var(--color-block-border);
-  box-shadow: 0 0 3px var(--color-block-border);
+  box-shadow: var(--shadow-glow-mark);
   animation: led-blink 1.6s ease-in-out infinite;
 }
 
@@ -259,7 +256,7 @@ onKeyStroke('Escape', close)
   height: 2px;
   border-radius: 1px;
   background: currentColor;
-  box-shadow: 0 0 4px currentColor;
+  box-shadow: var(--shadow-glow-mark);
 }
 
 .close-glyph::before {

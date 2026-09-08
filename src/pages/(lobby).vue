@@ -3,25 +3,73 @@ import { RouterLink } from 'vue-router'
 </script>
 
 <template>
-  <div
-    class="flex min-h-full flex-1 flex-col items-center justify-center gap-8 px-4 py-8"
-  >
-    <h1 class="text-2xl font-semibold tracking-tight text-neutral-100 sm:text-3xl">
-      Lobby
+  <div class="lobby-page">
+    <h1 class="title">
+      Saboteur Duel
     </h1>
-    <div class="flex w-full max-w-sm flex-col gap-4 sm:max-w-xs">
+
+    <nav class="actions">
       <RouterLink
         :to="{ name: '/match' }"
-        class="rounded-xl bg-cyan-500 px-8 py-4 text-center text-lg font-semibold text-white shadow-lg shadow-cyan-900/40 transition-colors hover:bg-cyan-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
+        class="action-btn"
       >
         Match
       </RouterLink>
       <RouterLink
         :to="{ name: '/result' }"
-        class="rounded-xl border-2 border-cyan-400/50 bg-cyan-950/30 px-8 py-3.5 text-center text-base font-medium text-cyan-100 transition-colors hover:border-cyan-300 hover:bg-cyan-900/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
+        class="action-btn"
       >
         Result
       </RouterLink>
-    </div>
+    </nav>
   </div>
 </template>
+
+<style scoped>
+.lobby-page {
+  display: flex;
+  min-height: 100%;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.75rem;
+  padding: 2rem 1rem;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-hud);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-hud-text);
+}
+
+.actions {
+  display: flex;
+  width: 100%;
+  max-width: 20rem;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.action-btn {
+  padding: 0.875rem 1.5rem;
+  border: 1px solid var(--color-block-border);
+  background: var(--color-grid-cell-border);
+  color: var(--color-hud-text);
+  font-family: var(--font-hud);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.action-btn:hover,
+.action-btn:focus-visible {
+  background: var(--color-cell-hover);
+}
+</style>
