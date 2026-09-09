@@ -218,18 +218,14 @@ export const useGridStore = defineStore('grid', () => {
       const goldAmount = neighbour.gold?.[inPort.group]
       if (goldAmount !== undefined) {
         const owner = neighbour.goldOwners?.[inPort.group]
+        const canClaim = owner === undefined && cardStore.claimMarker(neighbour.id, inPort.group, player.id)
 
-        if (owner === undefined || owner === player.id) {
+        if (canClaim || owner === player.id) {
           const goldKey = `${neighbour.id}:${inPort.group}`
 
           if (!countedGold.has(goldKey)) {
             total += goldAmount
             countedGold.add(goldKey)
-
-            if (owner === undefined) {
-              if (!neighbour.goldOwners) neighbour.goldOwners = {}
-              neighbour.goldOwners[inPort.group] = player.id
-            }
           }
         }
       }

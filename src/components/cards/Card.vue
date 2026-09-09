@@ -4,13 +4,26 @@ import { computed } from 'vue'
 
 import type { ICard } from '@/types'
 import { useCardStore } from '../../stores/cardStore'
+import { usePlayerStore } from '../../stores/playerStore'
 
 const props = defineProps<{
   cardId: string
 }>()
 
 const { getCardById } = useCardStore()
+const playerStore = usePlayerStore()
 const card = computed<ICard | undefined>(() => getCardById(props.cardId))
+
+const PLAYER_GOLD_COLOR: Record<number, string> = {
+  1: 'var(--color-yellow-400)',
+  2: 'var(--color-purple-400)',
+}
+
+const goldColor = computed<string>(() => {
+  const ownerId = Object.values(card.value?.goldOwners ?? {})[0]
+  const ownerColor = playerStore.getPlayerById(ownerId)?.color
+  return ownerColor ? PLAYER_GOLD_COLOR[ownerColor] : 'var(--color-block-border)'
+})
 
 const DOOR_COLOR: Record<number, string> = {
   1: 'yellow',
@@ -73,12 +86,14 @@ const ratOverlayClass = computed<string | null>(() => {
         :alt="card.style.svg"
         class="absolute inset-0 h-full w-full object-contain"
       >
-      <img
+      <div
         v-if="card.style.svg && card.style.goldSvg"
-        :src="`/cards/${card.style.goldSvg}`"
-        alt=""
-        class="pointer-events-none absolute inset-0 h-full w-full object-contain"
-      >
+        class="pointer-events-none absolute inset-0 [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]"
+        :style="{
+          backgroundColor: goldColor,
+          maskImage: `url(/cards/${card.style.goldSvg})`,
+        }"
+      />
       <img
         v-if="card.style.doorSvg"
         :src="`/cards/${card.style.doorSvg}`"

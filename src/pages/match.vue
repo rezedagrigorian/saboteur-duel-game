@@ -5,6 +5,7 @@ import exitIconSrc from '@/assets/exit-icon.svg'
 import BoardGrid from '../components/board/BoardGrid.vue'
 import ShadowCard from '../components/cards/ShadowCard.vue'
 import MatchControlPanel from '../components/features/match/control-panel/MatchControlPanel.vue'
+import MoleMarkerCounter from '../components/features/match/MoleMarkerCounter.vue'
 import RoundOverModal from '../components/features/match/RoundOverModal.vue'
 import { useCardStore } from '../stores/cardStore'
 import { usePlayerStore } from '../stores/playerStore'
@@ -30,6 +31,7 @@ onUnmounted(stopSync)
     <BoardGrid class="min-h-0" />
     <MatchControlPanel />
   </div>
+  <MoleMarkerCounter class="fixed left-4 top-4 z-40" />
   <RouterLink
     :to="{ name: '/(lobby)' }"
     class="exit-btn"

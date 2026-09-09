@@ -5,7 +5,7 @@ import type { ICardBase, ICard, ICardPort } from '@/types'
 import { ActionEffect, CardStatus, ToolKind } from '@/types/card'
 import { LAVANDER_ENTRANCE_CARD_ID, YELLOW_ENTRANCE_CARD_ID } from '@/game-core/constants'
 import { shuffle } from '@/utils/shuffle'
-import { HAND_SIZE } from '@/game-core/constants'
+import { HAND_SIZE, MOLE_MARKER_COUNT } from '@/game-core/constants'
 import { cards as cardBases } from './cards'
 import { usePlayerStore } from './playerStore'
 
@@ -44,6 +44,25 @@ export const useCardStore = defineStore('cards', () => {
     }
     return true
   })
+
+  const placedMarkerCount = computed(() => {
+    let count = 0
+    for (const card of cards.value.values()) {
+      count += Object.keys(card.goldOwners ?? {}).length
+    }
+    return count
+  })
+
+  const availableMarkerCount = computed(() => MOLE_MARKER_COUNT - placedMarkerCount.value)
+
+  function claimMarker(cardId: string, group: number, playerId: string): boolean {
+    if (availableMarkerCount.value <= 0) return false
+    const card = cards.value.get(cardId)
+    if (!card || card.goldOwners?.[group] !== undefined) return false
+    if (!card.goldOwners) card.goldOwners = {}
+    card.goldOwners[group] = playerId
+    return true
+  }
 
   function buildDeck():void {
     const deckIds = Array.from(cards.value.values())
@@ -223,6 +242,8 @@ export const useCardStore = defineStore('cards', () => {
     discardCard,
     discardSelectedCard,
     isRoundOver,
+    availableMarkerCount,
+    claimMarker,
     resetCards,
   }
 })

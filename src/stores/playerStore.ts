@@ -155,6 +155,7 @@ export const usePlayerStore = defineStore('player', () => {
     players,
     localPlayerId,
     currentPlayerId,
+    getPlayerById,
     localPlayer,
     opponent,
     currentPlayer,
